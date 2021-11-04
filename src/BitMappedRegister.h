@@ -3,30 +3,30 @@
 
 #include <cstdint>
 
-template <typename flagsEnum>
+template <typename FlagsEnum>
 struct BitMappedRegister
 {
     uint8_t value;
 
-    template <flagsEnum flagMask>
+    template <FlagsEnum flagMask>
     inline bool Test()
     {
         return value & flagMask;
     }
 
-    template <flagsEnum flagMask>
+    template <FlagsEnum flagMask>
     inline void Set()
     {
         value |= flagMask;
     }
 
-    template <flagsEnum flagMask>
+    template <FlagsEnum flagMask>
     inline void Toggle()
     {
         value ^= flagMask;
     }
 
-    template <flagsEnum flagMask>
+    template <FlagsEnum flagMask>
     inline void Clear()
     {
         value &= (~flagMask);
