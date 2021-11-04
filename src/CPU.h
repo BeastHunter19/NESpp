@@ -2,6 +2,7 @@
 #define CPU_H
 
 #include "BitMappedRegister.h"
+#include <cstdint>
 #include <cstdio>
 #include <cstring>
 #include <memory>
@@ -25,17 +26,15 @@ public:
 
     void AttachToBus(class MainBus* mainBus);
 
-    /*
-    void testStatus()
-    {
-        PS.value = 0x02;
-        std::printf("Processor status value: %u, zero flag: %u\n", PS.value, PS.test<Z>());
-        PS.set<B>();
-        std::printf("Processor status value: %u, break flag: %u\n", PS.value, PS.test<B>());
-    }
-    */
+    // access the main addressing space
+    inline uint8_t Read(uint16_t address);
+    inline void Write(uint16_t address, uint8_t data);
+
+    void LoadInstrFromString(const std::string& instructions);
 
     void Run();
+
+    void Reset();
 
 private:
     // reference to the main bus

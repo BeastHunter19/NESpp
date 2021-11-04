@@ -5,3 +5,8 @@ MainBus::MainBus(CPU* cpu)
 {
     this->cpu->AttachToBus(this);
 }
+
+void MainBus::ResetRAM()
+{
+    RAM.fill(0xFF);
+}

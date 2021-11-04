@@ -29,8 +29,10 @@ public:
     MainBus(CPU* cpu);
 
     // These are going to dispatch memory access
-    uint8_t read(uint16_t address);
-    void write(uint16_t address, uint8_t data);
+    uint8_t Read(uint16_t address) const;
+    void Write(uint16_t address, uint8_t data);
+
+    void ResetRAM();
 
 private:
     // pointers to the peripherals
