@@ -1,5 +1,7 @@
 #include "CPU.h"
 #include "MainBus.h"
+#include <cstddef>
+#include <iostream>
 
 CPU::CPU()
 {
@@ -40,7 +42,17 @@ void CPU::Write(uint16_t address, uint8_t data)
     mainBus->Write(address, data);
 }
 
-void CPU::LoadInstrFromString(const std::string& instructions) {}
+void CPU::LoadInstrFromArray(const uint8_t* instructions, size_t number)
+{
+    uint8_t opcode;
+    PC = 0;
+    while (PC < number)
+    {
+        Tick();
+        opcode = instructions[PC++];
+        ExecuteInstruction(opcode);
+    }
+}
 
 void CPU::Run() {}
 
@@ -61,7 +73,12 @@ void CPU::Reset()
     PC = (PCH << 8) | PCL;
 }
 
-void CPU::ExecuteInstruction() {}
+void CPU::ExecuteInstruction(uint8_t opcode)
+{
+    // TODO: mega switch
+
+    std::cout << "Executed instruction: " << std::hex << opcode << std::endl;
+}
 
 void CPU::Tick()
 {

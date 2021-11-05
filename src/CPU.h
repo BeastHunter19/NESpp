@@ -5,7 +5,6 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
-#include <memory>
 
 /*
  * NES CPU (Ricoh RP2A03) is based on the 6502
@@ -31,14 +30,14 @@ public:
     inline void Write(uint16_t address, uint8_t data);
 
     // assumes the CPU is in a clean state (mostly used for testing)
-    void LoadInstrFromString(const std::string& instructions);
+    void LoadInstrFromArray(const uint8_t* instructions, size_t number);
 
     void Run();
 
     // is automatically called by constructor
     void Reset();
 
-    void ExecuteInstruction();
+    void ExecuteInstruction(uint8_t opcode);
 
 private:
     // reference to the main bus
