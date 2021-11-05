@@ -3,12 +3,14 @@
 
 CPU::CPU()
 {
+    cycleCount = 0;
+
     PS.value = 0x34;
     A = X = Y = 0;
-    SP = 0xFD;
-    mainBus->ResetRAM();
+    // SP value after reset will be 0xFD
+    SP = 0x00;
 
-    // TODO: revisit these
+    // TODO: should be done by peripherals themselves
     Write(0x4017, 0x00);
     Write(0x4015, 0x00);
     for (uint16_t lastBits = 0x0000; lastBits <= 0x0013; lastBits++)
@@ -16,8 +18,9 @@ CPU::CPU()
         uint16_t address = 0x4000 & lastBits;
         mainBus->Write(address, 0x00);
     }
-
     // TODO: initialize APU registers
+
+    Reset();
 }
 
 void CPU::AttachToBus(MainBus* mainBus)
@@ -27,22 +30,40 @@ void CPU::AttachToBus(MainBus* mainBus)
 
 uint8_t CPU::Read(uint16_t address)
 {
+    Tick();
     return mainBus->Read(address);
 }
 
 void CPU::Write(uint16_t address, uint8_t data)
 {
+    Tick();
     mainBus->Write(address, data);
 }
 
 void CPU::LoadInstrFromString(const std::string& instructions) {}
 
+void CPU::Run() {}
+
 void CPU::Reset()
 {
-    SP -= 3;
     PS.Set<I>();
+    Tick();
+    Tick();
+    Tick();
+    SP--;
+    Tick();
+    SP--;
+    Tick();
+    SP--;
 
-    // TODO: reset APU status
+    uint8_t PCL = Read(0xFFFC);
+    uint8_t PCH = Read(0xFFFD);
+    PC = (PCH << 8) | PCL;
 }
 
-void CPU::Run() {}
+void CPU::ExecuteInstruction() {}
+
+void CPU::Tick()
+{
+    cycleCount++;
+}

@@ -30,11 +30,14 @@ public:
     inline uint8_t Read(uint16_t address);
     inline void Write(uint16_t address, uint8_t data);
 
+    // assumes the CPU is in a clean state (mostly used for testing)
     void LoadInstrFromString(const std::string& instructions);
 
     void Run();
 
     void Reset();
+
+    void ExecuteInstruction();
 
 private:
     // reference to the main bus
@@ -64,6 +67,9 @@ private:
     BitMappedRegister<CpuStatusFlags> PS;
 
     uint32_t cycleCount;
+
+    // Increment cycle count
+    inline void Tick();
 
     /*
      * The instructions can have different behavior
