@@ -66,4 +66,5 @@ void CPU::ExecuteInstruction() {}
 void CPU::Tick()
 {
     cycleCount++;
+    mainBus->Tick();
 }

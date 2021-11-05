@@ -14,6 +14,11 @@ uint8_t MainBus::Read(uint16_t address) const
 
 void MainBus::Write(uint16_t address, uint8_t data) {}
 
+void MainBus::Tick()
+{
+    // TODO: step all the peripherals
+}
+
 void MainBus::ResetRAM()
 {
     RAM.fill(0xFF);

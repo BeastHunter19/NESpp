@@ -35,6 +35,7 @@ public:
 
     void Run();
 
+    // is automatically called by constructor
     void Reset();
 
     void ExecuteInstruction();
