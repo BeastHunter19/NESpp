@@ -26,23 +26,6 @@ CPU::CPU(NES* mainBus)
     Reset();
 }
 
-void CPU::AttachToBus(NES* mainBus)
-{
-    this->mainBus = mainBus;
-}
-
-uint8_t CPU::Read(uint16_t address)
-{
-    Tick();
-    return mainBus->Read(address);
-}
-
-void CPU::Write(uint16_t address, uint8_t data)
-{
-    Tick();
-    mainBus->Write(address, data);
-}
-
 void CPU::LoadInstrFromArray(const uint8_t* instructions, size_t number)
 {
     uint8_t opcode;
@@ -85,4 +68,16 @@ void CPU::Tick()
 {
     cycleCount++;
     mainBus->Tick();
+}
+
+uint8_t CPU::Read(uint16_t address)
+{
+    Tick();
+    return mainBus->Read(address);
+}
+
+void CPU::Write(uint16_t address, uint8_t data)
+{
+    Tick();
+    mainBus->Write(address, data);
 }

@@ -23,12 +23,6 @@ class CPU
 public:
     CPU(class NES* mainBus);
 
-    void AttachToBus(class NES* mainBus);
-
-    // Access the main addressing space
-    inline uint8_t Read(uint16_t address);
-    inline void Write(uint16_t address, uint8_t data);
-
     // Assumes the CPU is in a clean state (mostly used for testing)
     void LoadInstrFromArray(const uint8_t* instructions, size_t number);
 
@@ -70,6 +64,10 @@ private:
 
     // Increment cycle count
     inline void Tick();
+
+    // Access the main addressing space
+    inline uint8_t Read(uint16_t address);
+    inline void Write(uint16_t address, uint8_t data);
 
     /*
      * The instructions can have different behavior
