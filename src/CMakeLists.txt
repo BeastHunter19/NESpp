@@ -3,14 +3,12 @@ set(
     BitMappedRegister.h
     CPU.h
     NES.h
-    NES.h
 )
 
 set(
     NESpp_SOURCES
     main.cpp
     CPU.cpp
-    NES.cpp
     NES.cpp
 )
 

@@ -38,6 +38,11 @@ void CPU::LoadInstrFromArray(const uint8_t* instructions, size_t number)
     }
 }
 
+CPU::CpuState CPU::GetCpuState() const
+{
+    return {SP, A, X, Y, PS.value, PC, cycleCount};
+}
+
 void CPU::Run() {}
 
 void CPU::Reset()
@@ -61,6 +66,7 @@ void CPU::ExecuteInstruction(uint8_t opcode)
 {
     // TODO: mega switch
 
+    Tick();
     std::cout << "Executed instruction: " << std::hex << opcode << std::endl;
 }
 

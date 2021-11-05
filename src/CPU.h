@@ -25,6 +25,13 @@ public:
 
     // Assumes the CPU is in a clean state (mostly used for testing)
     void LoadInstrFromArray(const uint8_t* instructions, size_t number);
+    struct CpuState
+    {
+        uint8_t SP, A, X, Y, PS;
+        uint16_t PC;
+        uint32_t cycleCount;
+    };
+    CpuState GetCpuState() const;
 
     void Run();
 

@@ -36,6 +36,8 @@ public:
 
     void ResetRAM();
 
+    CPU::CpuState ExecuteInstrFromArray(const uint8_t* instructions, size_t number);
+
 private:
     // Peripherals attached to the NES
     CPU cpu;
