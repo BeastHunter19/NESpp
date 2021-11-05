@@ -21,38 +21,38 @@ const uint32_t CYCLES_PER_FRAME = 29781;
 class CPU
 {
 public:
-    CPU();
+    CPU(class NES* mainBus);
 
-    void AttachToBus(class MainBus* mainBus);
+    void AttachToBus(class NES* mainBus);
 
-    // access the main addressing space
+    // Access the main addressing space
     inline uint8_t Read(uint16_t address);
     inline void Write(uint16_t address, uint8_t data);
 
-    // assumes the CPU is in a clean state (mostly used for testing)
+    // Assumes the CPU is in a clean state (mostly used for testing)
     void LoadInstrFromArray(const uint8_t* instructions, size_t number);
 
     void Run();
 
-    // is automatically called by constructor
+    // Is automatically called by constructor
     void Reset();
 
     void ExecuteInstruction(uint8_t opcode);
 
 private:
-    // reference to the main bus
-    MainBus* mainBus;
+    // Reference to the main bus
+    NES* mainBus;
 
-    // program counter
+    // Program counter
     uint16_t PC;
 
-    // stack pointer
+    // Stack pointer
     uint8_t SP;
 
-    // general purpose registers
+    // General purpose registers
     uint8_t A, X, Y;
 
-    // processor status
+    // Processor status
     enum CpuStatusFlags : uint8_t
     {
         C = 0x01, // carry

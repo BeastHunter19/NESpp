@@ -1,9 +1,10 @@
 #include "CPU.h"
-#include "MainBus.h"
+#include "NES.h"
 #include <cstddef>
 #include <iostream>
 
-CPU::CPU()
+CPU::CPU(NES* mainBus)
+    : mainBus(mainBus)
 {
     cycleCount = 0;
 
@@ -25,7 +26,7 @@ CPU::CPU()
     Reset();
 }
 
-void CPU::AttachToBus(MainBus* mainBus)
+void CPU::AttachToBus(NES* mainBus)
 {
     this->mainBus = mainBus;
 }
