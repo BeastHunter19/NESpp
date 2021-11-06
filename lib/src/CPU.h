@@ -76,7 +76,11 @@ private:
     inline uint8_t Read(uint16_t address);
     inline void Write(uint16_t address, uint8_t data);
 
+    // Checks if there is going to be a page boundary cross
     inline bool PageCrossed(uint16_t address, uint16_t offset);
+
+    // Update processor status flags Z and N
+    inline void UpdateZN(uint8_t value);
 
     /*
      * The instructions can have different behavior

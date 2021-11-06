@@ -103,6 +103,27 @@ bool CPU::PageCrossed(uint16_t address, uint16_t offset)
     }
 }
 
+void CPU::UpdateZN(uint8_t value)
+{
+    if (value == 0)
+    {
+        PS.Set<Z>();
+    }
+    else
+    {
+        PS.Clear<Z>();
+    }
+
+    if ((value & 0x80) != 0)
+    {
+        PS.Set<N>();
+    }
+    else
+    {
+        PS.Clear<N>();
+    }
+}
+
 uint16_t CPU::Immediate()
 {
     return PC++;
