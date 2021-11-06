@@ -76,6 +76,8 @@ private:
     inline uint8_t Read(uint16_t address);
     inline void Write(uint16_t address, uint8_t data);
 
+    inline bool PageCrossed(uint16_t address, uint16_t offset);
+
     /*
      * The instructions can have different behavior
      * depending on the addressing mode used, which
