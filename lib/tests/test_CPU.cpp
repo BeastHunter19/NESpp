@@ -1,4 +1,4 @@
-#include "NES.h"
+#include "NESpp/NES.h"
 #include "doctest/doctest.h"
 
 TEST_CASE("CPU executes all instructions correctly")
