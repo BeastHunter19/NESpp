@@ -13,5 +13,5 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 include(CTest)
 
 add_subdirectory(external)
-add_subdirectory(src)
-add_subdirectory(tests)
+add_subdirectory(lib)
+add_subdirectory(app)
