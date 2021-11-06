@@ -1,6 +1,7 @@
 #include "CPU.h"
 #include "NES.h"
 #include <cstddef>
+#include <cstdint>
 #include <iostream>
 
 CPU::CPU(NES* mainBus)
@@ -30,6 +31,7 @@ void CPU::LoadInstrFromArray(const uint8_t* instructions, size_t number)
 {
     uint8_t opcode;
     PC = 0;
+    cycleCount = 0;
     while (PC < number)
     {
         Tick();
