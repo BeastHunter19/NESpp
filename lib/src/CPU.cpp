@@ -166,35 +166,35 @@ void CPU::ExecuteInstruction(uint8_t opcode)
     case 0x5E: Illegal(); break;
     case 0x5F: Illegal(); break;
     case 0x60: Illegal(); break;
-    case 0x61: Illegal(); break;
+    case 0x61: ADC<&CPU::IndexedIndirect>(); break;
     case 0x62: Illegal(); break;
     case 0x63: Illegal(); break;
     case 0x64: Illegal(); break;
-    case 0x65: Illegal(); break;
+    case 0x65: ADC<&CPU::ZeroPage>(); break;
     case 0x66: Illegal(); break;
     case 0x67: Illegal(); break;
     case 0x68: Illegal(); break;
-    case 0x69: Illegal(); break;
+    case 0x69: ADC<&CPU::Immediate>(); break;
     case 0x6A: Illegal(); break;
     case 0x6B: Illegal(); break;
     case 0x6C: Illegal(); break;
-    case 0x6D: Illegal(); break;
+    case 0x6D: ADC<&CPU::Absolute>(); break;
     case 0x6E: Illegal(); break;
     case 0x6F: Illegal(); break;
     case 0x70: Illegal(); break;
-    case 0x71: Illegal(); break;
+    case 0x71: ADC<&CPU::IndirectIndexed>(); break;
     case 0x72: Illegal(); break;
     case 0x73: Illegal(); break;
     case 0x74: Illegal(); break;
-    case 0x75: Illegal(); break;
+    case 0x75: ADC<&CPU::ZeroPageX>(); break;
     case 0x76: Illegal(); break;
     case 0x77: Illegal(); break;
     case 0x78: Illegal(); break;
-    case 0x79: Illegal(); break;
+    case 0x79: ADC<&CPU::AbsoluteY>(); break;
     case 0x7A: Illegal(); break;
     case 0x7B: Illegal(); break;
     case 0x7C: Illegal(); break;
-    case 0x7D: Illegal(); break;
+    case 0x7D: ADC<&CPU::AbsoluteX>(); break;
     case 0x7E: Illegal(); break;
     case 0x7F: Illegal(); break;
     case 0x80: Illegal(); break;
@@ -230,35 +230,35 @@ void CPU::ExecuteInstruction(uint8_t opcode)
     case 0x9E: Illegal(); break;
     case 0x9F: Illegal(); break;
     case 0xA0: Illegal(); break;
-    case 0xA1: Illegal(); break;
+    case 0xA1: LDA<&CPU::IndexedIndirect>(); break;
     case 0xA2: Illegal(); break;
     case 0xA3: Illegal(); break;
     case 0xA4: Illegal(); break;
-    case 0xA5: Illegal(); break;
+    case 0xA5: LDA<&CPU::ZeroPage>(); break;
     case 0xA6: Illegal(); break;
     case 0xA7: Illegal(); break;
     case 0xA8: Illegal(); break;
-    case 0xA9: Illegal(); break;
+    case 0xA9: LDA<&CPU::Immediate>(); break;
     case 0xAA: Illegal(); break;
     case 0xAB: Illegal(); break;
     case 0xAC: Illegal(); break;
-    case 0xAD: Illegal(); break;
+    case 0xAD: LDA<&CPU::Absolute>(); break;
     case 0xAE: Illegal(); break;
     case 0xAF: Illegal(); break;
     case 0xB0: Illegal(); break;
-    case 0xB1: Illegal(); break;
+    case 0xB1: LDA<&CPU::IndirectIndexed>(); break;
     case 0xB2: Illegal(); break;
     case 0xB3: Illegal(); break;
     case 0xB4: Illegal(); break;
-    case 0xB5: Illegal(); break;
+    case 0xB5: LDA<&CPU::ZeroPageX>(); break;
     case 0xB6: Illegal(); break;
     case 0xB7: Illegal(); break;
     case 0xB8: Illegal(); break;
-    case 0xB9: Illegal(); break;
+    case 0xB9: LDA<&CPU::AbsoluteY>(); break;
     case 0xBA: Illegal(); break;
     case 0xBB: Illegal(); break;
     case 0xBC: Illegal(); break;
-    case 0xBD: Illegal(); break;
+    case 0xBD: LDA<&CPU::AbsoluteX>(); break;
     case 0xBE: Illegal(); break;
     case 0xBF: Illegal(); break;
     case 0xC0: Illegal(); break;
@@ -484,4 +484,41 @@ uint16_t CPU::IndirectIndexed()
 void CPU::Illegal()
 {
     Tick();
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::ADC()
+{
+    uint16_t address = (this->*AddrMode)();
+    uint8_t operand = Read(address);
+    uint8_t carry = PS.Test<C>();
+    uint8_t result = A + operand + carry;
+    UpdateZN(result);
+    if (result < A)
+    {
+        PS.Set<C>();
+    }
+    else
+    {
+        PS.Clear<C>();
+    }
+
+    if ((~(A ^ (operand + carry)) & (A ^ result)) & 0x80)
+    {
+        PS.Set<V>();
+    }
+    else
+    {
+        PS.Clear<V>();
+    }
+    A = result;
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::LDA()
+{
+    uint16_t address = (this->*AddrMode)();
+    uint8_t operand = Read(address);
+    UpdateZN(operand);
+    A = operand;
 }

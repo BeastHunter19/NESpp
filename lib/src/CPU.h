@@ -25,9 +25,23 @@ public:
 
     // Assumes the CPU is in a clean state (mostly used for testing)
     void LoadInstrFromArray(const uint8_t* instructions, size_t number);
+
+    enum CpuStatusFlags : uint8_t
+    {
+        C = 0x01, // carry
+        Z = 0x02, // zero
+        I = 0x04, // interrupt disable
+        D = 0x08, // decimal (unused on NES)
+        B = 0x10, // break
+        _ = 0x20, // unused
+        V = 0x40, // overflow
+        N = 0x80, // negative
+    };
+
     struct CpuState
     {
-        uint8_t SP, A, X, Y, PS;
+        uint8_t SP, A, X, Y;
+        BitMappedRegister<CpuStatusFlags> PS;
         uint16_t PC;
         uint32_t cycleCount;
     };
@@ -56,17 +70,6 @@ private:
     uint8_t A, X, Y;
 
     // Processor status
-    enum CpuStatusFlags : uint8_t
-    {
-        C = 0x01, // carry
-        Z = 0x02, // zero
-        I = 0x04, // interrupt disable
-        D = 0x08, // decimal (unused on NES)
-        B = 0x10, // break
-        _ = 0x20, // unused
-        V = 0x40, // overflow
-        N = 0x80, // negative
-    };
     BitMappedRegister<CpuStatusFlags> PS;
 
     uint32_t cycleCount;
