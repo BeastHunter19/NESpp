@@ -9,9 +9,16 @@ struct BitMappedRegister
     uint8_t value;
 
     template <FlagsEnum flagMask>
-    inline bool Test()
+    inline int Test()
     {
-        return value & flagMask;
+        if ((value & flagMask) == 0)
+        {
+            return 0;
+        }
+        else
+        {
+            return 1;
+        }
     }
 
     template <FlagsEnum flagMask>

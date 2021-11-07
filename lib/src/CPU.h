@@ -40,6 +40,8 @@ public:
 
     void ExecuteInstruction(uint8_t opcode);
 
+    typedef uint16_t (CPU::*AddressModePtr)();
+
 private:
     // Reference to the main bus
     NES* mainBus;
@@ -135,6 +137,188 @@ private:
     // Uses a 8 bit address to fetch a pointer from
     // zero page, which is then incremented by Y
     inline uint16_t IndirectIndexed();
+
+    /*
+     * ------- Instructions -------
+     *
+     * There are 56 different instructions in the 6502,
+     * but each one can have multiple addressing modes,
+     * thus achieving a total of 151 instructions.
+     * The remaining unused or "illegal" opcodes have
+     * varying kinds of effects, from useful ones to
+     * others that simply jam the machine until it is reset.
+     */
+
+    // Empty placeholder instruction for illegal opcodes
+    inline void Illegal();
+
+    template <AddressModePtr AddrMode>
+    inline void ADC();
+
+    template <AddressModePtr AddrMode>
+    inline void AND();
+
+    template <AddressModePtr AddrMode>
+    inline void ASL();
+
+    template <AddressModePtr AddrMode>
+    inline void BCC();
+
+    template <AddressModePtr AddrMode>
+    inline void BCS();
+
+    template <AddressModePtr AddrMode>
+    inline void BEQ();
+
+    template <AddressModePtr AddrMode>
+    inline void BIT();
+
+    template <AddressModePtr AddrMode>
+    inline void BMI();
+
+    template <AddressModePtr AddrMode>
+    inline void BNE();
+
+    template <AddressModePtr AddrMode>
+    inline void BPL();
+
+    template <AddressModePtr AddrMode>
+    inline void BRK();
+
+    template <AddressModePtr AddrMode>
+    inline void BVC();
+
+    template <AddressModePtr AddrMode>
+    inline void BVS();
+
+    template <AddressModePtr AddrMode>
+    inline void CLC();
+
+    template <AddressModePtr AddrMode>
+    inline void CLD();
+
+    template <AddressModePtr AddrMode>
+    inline void CLI();
+
+    template <AddressModePtr AddrMode>
+    inline void CLV();
+
+    template <AddressModePtr AddrMode>
+    inline void CMP();
+
+    template <AddressModePtr AddrMode>
+    inline void CPX();
+
+    template <AddressModePtr AddrMode>
+    inline void CPY();
+
+    template <AddressModePtr AddrMode>
+    inline void DEC();
+
+    template <AddressModePtr AddrMode>
+    inline void DEX();
+
+    template <AddressModePtr AddrMode>
+    inline void DEY();
+
+    template <AddressModePtr AddrMode>
+    inline void EOR();
+
+    template <AddressModePtr AddrMode>
+    inline void INC();
+
+    template <AddressModePtr AddrMode>
+    inline void INX();
+
+    template <AddressModePtr AddrMode>
+    inline void INY();
+
+    template <AddressModePtr AddrMode>
+    inline void JMP();
+
+    template <AddressModePtr AddrMode>
+    inline void JSR();
+
+    template <AddressModePtr AddrMode>
+    inline void LDA();
+
+    template <AddressModePtr AddrMode>
+    inline void LDX();
+
+    template <AddressModePtr AddrMode>
+    inline void LDY();
+
+    template <AddressModePtr AddrMode>
+    inline void LSR();
+
+    template <AddressModePtr AddrMode>
+    inline void NOP();
+
+    template <AddressModePtr AddrMode>
+    inline void ORA();
+
+    template <AddressModePtr AddrMode>
+    inline void PHA();
+
+    template <AddressModePtr AddrMode>
+    inline void PHP();
+
+    template <AddressModePtr AddrMode>
+    inline void PLA();
+
+    template <AddressModePtr AddrMode>
+    inline void PLP();
+
+    template <AddressModePtr AddrMode>
+    inline void ROL();
+
+    template <AddressModePtr AddrMode>
+    inline void ROR();
+
+    template <AddressModePtr AddrMode>
+    inline void RTI();
+
+    template <AddressModePtr AddrMode>
+    inline void RTS();
+
+    template <AddressModePtr AddrMode>
+    inline void SBC();
+
+    template <AddressModePtr AddrMode>
+    inline void SEC();
+
+    template <AddressModePtr AddrMode>
+    inline void SED();
+
+    template <AddressModePtr AddrMode>
+    inline void SEI();
+
+    template <AddressModePtr AddrMode>
+    inline void STA();
+
+    template <AddressModePtr AddrMode>
+    inline void STX();
+
+    template <AddressModePtr AddrMode>
+    inline void STY();
+
+    template <AddressModePtr AddrMode>
+    inline void TAX();
+
+    template <AddressModePtr AddrMode>
+    inline void TAY();
+
+    template <AddressModePtr AddrMode>
+    inline void TSX();
+
+    template <AddressModePtr AddrMode>
+    inline void TXA();
+
+    template <AddressModePtr AddrMode>
+    inline void TXS();
+
+    template <AddressModePtr AddrMode>
+    inline void TYA();
 };
 
 #endif // CPU_H
