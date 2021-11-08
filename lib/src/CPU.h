@@ -103,6 +103,9 @@ private:
      * - Accumulator: operates on the accumulator
      */
 
+    // The operand is implicit in the instruction
+    inline uint16_t Implied();
+
     // Uses a 8 bit operand directly without memory access
     inline uint16_t Immediate();
 

@@ -93,7 +93,7 @@ void CPU::ExecuteInstruction(uint8_t opcode)
     case 0x15: Illegal(); break;
     case 0x16: Illegal(); break;
     case 0x17: Illegal(); break;
-    case 0x18: Illegal(); break;
+    case 0x18: CLC<&CPU::Implied>(); break;
     case 0x19: Illegal(); break;
     case 0x1A: Illegal(); break;
     case 0x1B: Illegal(); break;
@@ -125,7 +125,7 @@ void CPU::ExecuteInstruction(uint8_t opcode)
     case 0x35: Illegal(); break;
     case 0x36: Illegal(); break;
     case 0x37: Illegal(); break;
-    case 0x38: Illegal(); break;
+    case 0x38: SEC<&CPU::Implied>(); break;
     case 0x39: Illegal(); break;
     case 0x3A: Illegal(); break;
     case 0x3B: Illegal(); break;
@@ -303,7 +303,7 @@ void CPU::ExecuteInstruction(uint8_t opcode)
     case 0xE7: Illegal(); break;
     case 0xE8: Illegal(); break;
     case 0xE9: Illegal(); break;
-    case 0xEA: Illegal(); break;
+    case 0xEA: NOP<&CPU::Implied>(); break;
     case 0xEB: Illegal(); break;
     case 0xEC: Illegal(); break;
     case 0xED: Illegal(); break;
@@ -381,6 +381,11 @@ void CPU::UpdateZN(uint8_t value)
 }
 
 // ADDDRESSING MODES
+
+uint16_t CPU::Implied()
+{
+    return uint16_t{};
+}
 
 uint16_t CPU::Immediate()
 {
@@ -503,6 +508,8 @@ void CPU::ADC()
         PS.Clear<C>();
     }
 
+    // Overflow is set if the two operands have the same sign
+    // (both 0 or both 1) and the resul have a different one
     if ((~(A ^ (operand + carry)) & (A ^ result)) & 0x80)
     {
         PS.Set<V>();
@@ -515,10 +522,30 @@ void CPU::ADC()
 }
 
 template <CPU::AddressModePtr AddrMode>
+void CPU::CLC()
+{
+    Tick();
+    PS.Clear<C>();
+}
+
+template <CPU::AddressModePtr AddrMode>
 void CPU::LDA()
 {
     uint16_t address = (this->*AddrMode)();
     uint8_t operand = Read(address);
     UpdateZN(operand);
     A = operand;
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::NOP()
+{
+    Tick();
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::SEC()
+{
+    Tick();
+    PS.Set<C>();
 }
