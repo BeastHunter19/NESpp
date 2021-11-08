@@ -30,7 +30,6 @@ CPU::CPU(NES* mainBus)
 
 void CPU::LoadInstrFromArray(const uint8_t* instructions, size_t number)
 {
-    uint8_t opcode;
     PC = 0;
     cycleCount = 0;
     while (PC < number)
@@ -326,7 +325,7 @@ void CPU::ExecuteInstruction(uint8_t opcode)
     case 0xFE: Illegal(); break;
     case 0xFF: Illegal(); break;
     }
-    std::cout << "Executed instruction: " << std::hex << opcode << std::endl;
+    // std::cout << "Executed instruction: " << std::hex << opcode << std::endl;
 }
 
 void CPU::Tick()
