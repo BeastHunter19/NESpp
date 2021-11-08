@@ -90,6 +90,36 @@ TEST_CASE("CPU executes all instructions correctly")
         CHECK(state.PS.Test<CPU::C>() == 0);
     }
 
+    SUBCASE("JMP")
+    {
+        SUBCASE("Absolute")
+        {
+            // JMP $03EF
+            uint8_t instructions[]{0x4C, 0xEF, 0x07};
+            CPU::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 3);
+            CHECK(state.cycleCount == 3);
+            CHECK(state.PC == 0x07EF);
+        }
+
+        SUBCASE("Indirect")
+        {
+            // LDA #$EF ; STA $0320 ; LDA #$02 ; STA $0321 ; JMP $(0320)
+            uint8_t instructions[]{0xA9, 0xEF, 0x8D, 0x20, 0x03, 0xA9, 0x07, 0x8D, 0x21, 0x03, 0x6C, 0x20, 0x03};
+            CPU::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 13);
+            CHECK(state.cycleCount == 17);
+            CHECK(state.PC == 0x07EF);
+        }
+
+        SUBCASE("Indirect (with wrap around bug)")
+        {
+            // LDA #$EF ; STA $03FF ; LDA #$02 ; STA $0321 ; JMP $(0320)
+            uint8_t instructions[]{0xA9, 0xEF, 0x8D, 0xFF, 0x03, 0xA9, 0x07, 0x8D, 0x00, 0x03, 0x6C, 0xFF, 0x03};
+            CPU::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 13);
+            CHECK(state.cycleCount == 17);
+            CHECK(state.PC == 0x07EF);
+        }
+    }
+
     SUBCASE("LDA")
     {
         SUBCASE("Load zero")

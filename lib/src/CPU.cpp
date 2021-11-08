@@ -37,7 +37,7 @@ void CPU::LoadInstrFromArray(const uint8_t* instructions, size_t number)
 
     cycleCount = 0;
     PC = 0x0700;
-    while (PC < (0x0700 + number))
+    while (PC < (0x0700 + number) && cycleCount < CYCLES_PER_FRAME)
     {
         opcode = Read(PC++);
         ExecuteInstruction(opcode);
@@ -148,7 +148,7 @@ void CPU::ExecuteInstruction(uint8_t opcode)
     case 0x49: Illegal(); break;
     case 0x4A: Illegal(); break;
     case 0x4B: Illegal(); break;
-    case 0x4C: Illegal(); break;
+    case 0x4C: JMP<&CPU::Absolute>(); break;
     case 0x4D: Illegal(); break;
     case 0x4E: Illegal(); break;
     case 0x4F: Illegal(); break;
@@ -180,7 +180,7 @@ void CPU::ExecuteInstruction(uint8_t opcode)
     case 0x69: ADC<&CPU::Immediate>(); break;
     case 0x6A: Illegal(); break;
     case 0x6B: Illegal(); break;
-    case 0x6C: Illegal(); break;
+    case 0x6C: JMP<&CPU::Indirect>(); break;
     case 0x6D: ADC<&CPU::Absolute>(); break;
     case 0x6E: Illegal(); break;
     case 0x6F: Illegal(); break;
@@ -424,7 +424,12 @@ int CPU::Indirect()
     uint8_t pointerHigh = Read(PC++);
     uint16_t pointer = ((uint16_t)pointerHigh << 8) | pointerLow;
     uint8_t effectiveAddressLow = Read(pointer);
-    uint8_t effectiveAddressHigh = Read(pointer + 1);
+    // If the low byte is at a page boundary, the high one is
+    // fetched from the start of the same page due to a bug
+    // in the original 6502
+    pointerLow++;
+    pointer = ((uint16_t)pointerHigh << 8) | pointerLow;
+    uint8_t effectiveAddressHigh = Read(pointer);
     address = ((uint16_t)effectiveAddressHigh << 8) | effectiveAddressLow;
     return 0;
 }
@@ -547,6 +552,13 @@ void CPU::CLC()
 {
     Tick();
     PS.Clear<C>();
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::JMP()
+{
+    (this->*AddrMode)();
+    PC = address;
 }
 
 template <CPU::AddressModePtr AddrMode>
