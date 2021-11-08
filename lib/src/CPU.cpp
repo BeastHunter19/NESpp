@@ -30,12 +30,16 @@ CPU::CPU(NES* mainBus)
 
 void CPU::LoadInstrFromArray(const uint8_t* instructions, size_t number)
 {
-    PC = 0;
-    cycleCount = 0;
-    while (PC < number)
+    for (size_t instr = 0; instr < number; instr++)
     {
-        Tick();
-        opcode = instructions[PC++];
+        Write(0x0700 + instr, instructions[instr]);
+    }
+
+    cycleCount = 0;
+    PC = 0x0700;
+    while (PC < (0x0700 + number))
+    {
+        opcode = Read(PC++);
         ExecuteInstruction(opcode);
     }
 }
@@ -429,7 +433,7 @@ int CPU::ZeroPageX()
 {
     uint8_t zeroPageAddress = Read(PC++);
     Tick();
-    address = (uint16_t)(zeroPageAddress + X);
+    address = (uint16_t)((zeroPageAddress + X) % 256);
     return 0;
 }
 
@@ -437,7 +441,7 @@ int CPU::ZeroPageY()
 {
     uint8_t zeroPageAddress = Read(PC++);
     Tick();
-    address = (uint16_t)(zeroPageAddress + Y);
+    address = (uint16_t)((zeroPageAddress + Y) % 256);
     return 0;
 }
 
@@ -487,10 +491,10 @@ int CPU::IndexedIndirect()
 int CPU::IndirectIndexed()
 {
     uint8_t zeroPagePointer = Read(PC++);
-    uint8_t effectivePointerLow = Read(zeroPagePointer);
-    uint8_t effectivePointerHigh = Read(zeroPagePointer + 1);
+    uint8_t effectivePointerLow = Read(zeroPagePointer++);
+    uint8_t effectivePointerHigh = Read(zeroPagePointer);
     uint16_t effectivePointer = ((uint16_t)effectivePointerHigh << 8) | effectivePointerLow;
-    address = Read(effectivePointer + Y);
+    address = effectivePointer + Y;
     if (PageCrossed(effectivePointer, Y))
     {
         return 1;
@@ -598,6 +602,9 @@ template <CPU::AddressModePtr AddrMode>
 void CPU::STA()
 {
     (this->*AddrMode)();
-    Tick();
+    if (AddrMode == &CPU::AbsoluteX || AddrMode == &CPU::AbsoluteY || AddrMode == &CPU::IndirectIndexed)
+    {
+        Tick();
+    }
     Write(address, A);
 }

@@ -23,7 +23,8 @@ class CPU
 public:
     CPU(class NES* mainBus);
 
-    // Assumes the CPU is in a clean state (mostly used for testing)
+    // Assumes the CPU is in a clean state (mostly used for testing).
+    // Can load at most 100 instructions, since they are stored at 0x0700.
     void LoadInstrFromArray(const uint8_t* instructions, size_t number);
 
     enum CpuStatusFlags : uint8_t
