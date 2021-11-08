@@ -54,7 +54,7 @@ public:
 
     void ExecuteInstruction(uint8_t opcode);
 
-    typedef uint16_t (CPU::*AddressModePtr)();
+    typedef int (CPU::*AddressModePtr)();
 
 private:
     // Reference to the main bus
@@ -73,6 +73,10 @@ private:
     BitMappedRegister<CpuStatusFlags> PS;
 
     uint32_t cycleCount;
+
+    // These are used during instruction execution
+    uint8_t opcode;
+    uint16_t address;
 
     // Increment cycle count
     inline void Tick();
@@ -93,7 +97,9 @@ private:
      * is the way the operands are fetched from memory.
      * The addressing modes are represented as separate
      * functions that are then called to retrieve the
-     * operands for the instruction functions
+     * operands for the instruction functions.
+     * All the addressing mode functions return the
+     * number of extra cycles that they take (if any).
      *
      *
      * ------- Addressing modes -------
@@ -104,45 +110,45 @@ private:
      */
 
     // The operand is implicit in the instruction
-    inline uint16_t Implied();
+    inline int Implied();
 
     // Uses a 8 bit operand directly without memory access
-    inline uint16_t Immediate();
+    inline int Immediate();
 
     // Fetches the value from 8 bit address from zero page
-    inline uint16_t ZeroPage();
+    inline int ZeroPage();
 
     // Fetches the value from anywhere in memory
-    inline uint16_t Absolute();
+    inline int Absolute();
 
     // Only used in branch instruction, uses 8 bit offset
-    inline uint16_t Relative();
+    inline int Relative();
 
     // Only used in jump instruction, uses a pointer in memory
-    inline uint16_t Indirect();
+    inline int Indirect();
 
     // The following modes are indexed: they use X and Y
     // registers to offset addresses obtained through other modes
 
     // Same ad ZeroPage, but adds value in X register
-    inline uint16_t ZeroPageX();
+    inline int ZeroPageX();
 
     // Same ad ZeroPage, but adds value in Y register
-    inline uint16_t ZeroPageY();
+    inline int ZeroPageY();
 
     // Same ad Absolute, but adds value in X register
-    inline uint16_t AbsoluteX();
+    inline int AbsoluteX();
 
     // Same ad Absolute, but adds value in Y register
-    inline uint16_t AbsoluteY();
+    inline int AbsoluteY();
 
     // Uses a 8 bit address incremented by X to fetch
     // a pointer from zero page
-    inline uint16_t IndexedIndirect();
+    inline int IndexedIndirect();
 
     // Uses a 8 bit address to fetch a pointer from
     // zero page, which is then incremented by Y
-    inline uint16_t IndirectIndexed();
+    inline int IndirectIndexed();
 
     /*
      * ------- Instructions -------

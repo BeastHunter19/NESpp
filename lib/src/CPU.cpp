@@ -198,11 +198,11 @@ void CPU::ExecuteInstruction(uint8_t opcode)
     case 0x7E: Illegal(); break;
     case 0x7F: Illegal(); break;
     case 0x80: Illegal(); break;
-    case 0x81: Illegal(); break;
+    case 0x81: STA<&CPU::IndexedIndirect>(); break;
     case 0x82: Illegal(); break;
     case 0x83: Illegal(); break;
     case 0x84: Illegal(); break;
-    case 0x85: Illegal(); break;
+    case 0x85: STA<&CPU::ZeroPage>(); break;
     case 0x86: Illegal(); break;
     case 0x87: Illegal(); break;
     case 0x88: Illegal(); break;
@@ -210,56 +210,56 @@ void CPU::ExecuteInstruction(uint8_t opcode)
     case 0x8A: Illegal(); break;
     case 0x8B: Illegal(); break;
     case 0x8C: Illegal(); break;
-    case 0x8D: Illegal(); break;
+    case 0x8D: STA<&CPU::Absolute>(); break;
     case 0x8E: Illegal(); break;
     case 0x8F: Illegal(); break;
     case 0x90: Illegal(); break;
-    case 0x91: Illegal(); break;
+    case 0x91: STA<&CPU::IndirectIndexed>(); break;
     case 0x92: Illegal(); break;
     case 0x93: Illegal(); break;
     case 0x94: Illegal(); break;
-    case 0x95: Illegal(); break;
+    case 0x95: STA<&CPU::ZeroPageX>(); break;
     case 0x96: Illegal(); break;
     case 0x97: Illegal(); break;
     case 0x98: Illegal(); break;
-    case 0x99: Illegal(); break;
+    case 0x99: STA<&CPU::AbsoluteY>(); break;
     case 0x9A: Illegal(); break;
     case 0x9B: Illegal(); break;
     case 0x9C: Illegal(); break;
-    case 0x9D: Illegal(); break;
+    case 0x9D: STA<&CPU::AbsoluteX>(); break;
     case 0x9E: Illegal(); break;
     case 0x9F: Illegal(); break;
-    case 0xA0: Illegal(); break;
+    case 0xA0: LDY<&CPU::Immediate>(); break;
     case 0xA1: LDA<&CPU::IndexedIndirect>(); break;
-    case 0xA2: Illegal(); break;
+    case 0xA2: LDX<&CPU::Immediate>(); break;
     case 0xA3: Illegal(); break;
-    case 0xA4: Illegal(); break;
+    case 0xA4: LDY<&CPU::ZeroPage>(); break;
     case 0xA5: LDA<&CPU::ZeroPage>(); break;
-    case 0xA6: Illegal(); break;
+    case 0xA6: LDX<&CPU::ZeroPage>(); break;
     case 0xA7: Illegal(); break;
     case 0xA8: Illegal(); break;
     case 0xA9: LDA<&CPU::Immediate>(); break;
     case 0xAA: Illegal(); break;
     case 0xAB: Illegal(); break;
-    case 0xAC: Illegal(); break;
+    case 0xAC: LDY<&CPU::Absolute>(); break;
     case 0xAD: LDA<&CPU::Absolute>(); break;
-    case 0xAE: Illegal(); break;
+    case 0xAE: LDX<&CPU::Absolute>(); break;
     case 0xAF: Illegal(); break;
     case 0xB0: Illegal(); break;
     case 0xB1: LDA<&CPU::IndirectIndexed>(); break;
     case 0xB2: Illegal(); break;
     case 0xB3: Illegal(); break;
-    case 0xB4: Illegal(); break;
+    case 0xB4: LDY<&CPU::ZeroPageX>(); break;
     case 0xB5: LDA<&CPU::ZeroPageX>(); break;
-    case 0xB6: Illegal(); break;
+    case 0xB6: LDX<&CPU::ZeroPageY>(); break;
     case 0xB7: Illegal(); break;
     case 0xB8: Illegal(); break;
     case 0xB9: LDA<&CPU::AbsoluteY>(); break;
     case 0xBA: Illegal(); break;
     case 0xBB: Illegal(); break;
-    case 0xBC: Illegal(); break;
+    case 0xBC: LDY<&CPU::AbsoluteX>(); break;
     case 0xBD: LDA<&CPU::AbsoluteX>(); break;
-    case 0xBE: Illegal(); break;
+    case 0xBE: LDX<&CPU::AbsoluteY>(); break;
     case 0xBF: Illegal(); break;
     case 0xC0: Illegal(); break;
     case 0xC1: Illegal(); break;
@@ -382,106 +382,124 @@ void CPU::UpdateZN(uint8_t value)
 
 // ADDDRESSING MODES
 
-uint16_t CPU::Implied()
+int CPU::Implied()
 {
-    return uint16_t{};
+    return 0;
 }
 
-uint16_t CPU::Immediate()
+int CPU::Immediate()
 {
-    return PC++;
+    address = PC++;
+    return 0;
 }
 
-uint16_t CPU::ZeroPage()
+int CPU::ZeroPage()
 {
     uint8_t zeroPageAddress = Read(PC++);
-    return (uint16_t)zeroPageAddress;
+    address = (uint16_t)zeroPageAddress;
+    return 0;
 }
 
-uint16_t CPU::Absolute()
+int CPU::Absolute()
 {
     uint8_t lowByte = Read(PC++);
     uint8_t highByte = Read(PC++);
-    return ((uint16_t)highByte << 8) | lowByte;
+    address = ((uint16_t)highByte << 8) | lowByte;
+    return 0;
 }
 
 // TODO: revisit after implementing branches
-uint16_t CPU::Relative()
+int CPU::Relative()
 {
     uint8_t offset = Read(PC++);
     return offset;
 }
 
-uint16_t CPU::Indirect()
+int CPU::Indirect()
 {
     uint8_t pointerLow = Read(PC++);
     uint8_t pointerHigh = Read(PC++);
     uint16_t pointer = ((uint16_t)pointerHigh << 8) | pointerLow;
     uint8_t effectiveAddressLow = Read(pointer);
     uint8_t effectiveAddressHigh = Read(pointer + 1);
-    return ((uint16_t)effectiveAddressHigh << 8) | effectiveAddressLow;
+    address = ((uint16_t)effectiveAddressHigh << 8) | effectiveAddressLow;
+    return 0;
 }
 
-uint16_t CPU::ZeroPageX()
+int CPU::ZeroPageX()
 {
     uint8_t zeroPageAddress = Read(PC++);
     Tick();
-    return (uint16_t)(zeroPageAddress + X);
+    address = (uint16_t)(zeroPageAddress + X);
+    return 0;
 }
 
-uint16_t CPU::ZeroPageY()
+int CPU::ZeroPageY()
 {
     uint8_t zeroPageAddress = Read(PC++);
     Tick();
-    return (uint16_t)(zeroPageAddress + Y);
+    address = (uint16_t)(zeroPageAddress + Y);
+    return 0;
 }
 
-uint16_t CPU::AbsoluteX()
+int CPU::AbsoluteX()
 {
     uint8_t lowByte = Read(PC++);
     uint8_t highByte = Read(PC++);
     uint16_t effectiveAddress = ((uint16_t)highByte << 8) | lowByte;
+    address = effectiveAddress + X;
     if (PageCrossed(effectiveAddress, X))
     {
-        Tick();
+        return 1;
     }
-    return effectiveAddress + X;
+    else
+    {
+        return 0;
+    }
 }
 
-uint16_t CPU::AbsoluteY()
+int CPU::AbsoluteY()
 {
     uint8_t lowByte = Read(PC++);
     uint8_t highByte = Read(PC++);
     uint16_t effectiveAddress = ((uint16_t)highByte << 8) | lowByte;
+    address = effectiveAddress + Y;
     if (PageCrossed(effectiveAddress, Y))
     {
-        Tick();
+        return 1;
     }
-    return effectiveAddress + Y;
+    else
+    {
+        return 0;
+    }
 }
 
-uint16_t CPU::IndexedIndirect()
+int CPU::IndexedIndirect()
 {
     uint8_t zeroPagePointer = Read(PC++);
     Tick();
     zeroPagePointer += X;
     uint8_t effectiveAddressLow = Read(zeroPagePointer);
     uint8_t effectiveAddressHigh = Read(zeroPagePointer + 1);
-    return ((uint16_t)effectiveAddressHigh << 8) | effectiveAddressLow;
+    address = ((uint16_t)effectiveAddressHigh << 8) | effectiveAddressLow;
+    return 0;
 }
 
-uint16_t CPU::IndirectIndexed()
+int CPU::IndirectIndexed()
 {
     uint8_t zeroPagePointer = Read(PC++);
     uint8_t effectivePointerLow = Read(zeroPagePointer);
     uint8_t effectivePointerHigh = Read(zeroPagePointer + 1);
     uint16_t effectivePointer = ((uint16_t)effectivePointerHigh << 8) | effectivePointerLow;
+    address = Read(effectivePointer + Y);
     if (PageCrossed(effectivePointer, Y))
     {
-        Tick();
+        return 1;
     }
-    effectivePointer += Y;
-    return Read(effectivePointer);
+    else
+    {
+        return 0;
+    }
 }
 
 // INSTRUCTIONS
@@ -494,7 +512,7 @@ void CPU::Illegal()
 template <CPU::AddressModePtr AddrMode>
 void CPU::ADC()
 {
-    uint16_t address = (this->*AddrMode)();
+    (this->*AddrMode)();
     uint8_t operand = Read(address);
     uint8_t carry = PS.Test<C>();
     uint8_t result = A + operand + carry;
@@ -531,10 +549,37 @@ void CPU::CLC()
 template <CPU::AddressModePtr AddrMode>
 void CPU::LDA()
 {
-    uint16_t address = (this->*AddrMode)();
+    if ((this->*AddrMode)() == 1)
+    {
+        Tick();
+    }
     uint8_t operand = Read(address);
     UpdateZN(operand);
     A = operand;
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::LDX()
+{
+    if ((this->*AddrMode)() == 1)
+    {
+        Tick();
+    }
+    uint8_t operand = Read(address);
+    UpdateZN(operand);
+    X = operand;
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::LDY()
+{
+    if ((this->*AddrMode)() == 1)
+    {
+        Tick();
+    }
+    uint8_t operand = Read(address);
+    UpdateZN(operand);
+    Y = operand;
 }
 
 template <CPU::AddressModePtr AddrMode>
@@ -548,4 +593,12 @@ void CPU::SEC()
 {
     Tick();
     PS.Set<C>();
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::STA()
+{
+    (this->*AddrMode)();
+    Tick();
+    Write(address, A);
 }
