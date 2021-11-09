@@ -1,6 +1,7 @@
 set(
     NESpp_HEADERS
-    NES.h
+    Debugger.h
+    Emulator.h
 )
 
 set(
@@ -8,7 +9,10 @@ set(
     BitMappedRegister.h
     CPU.h
     CPU.cpp
+    NES.h
     NES.cpp
+    Debugger.cpp
+    Emulator.cpp
 )
 
 list(TRANSFORM NESpp_HEADERS PREPEND include/NESpp/)

@@ -1,4 +1,4 @@
-#include "NESpp/NES.h"
+#include "NES.h"
 #include "doctest/doctest.h"
 
 /*

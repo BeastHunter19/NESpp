@@ -27,6 +27,7 @@ class NES
 {
 public:
     NES();
+    virtual ~NES() = default;
 
     // These are going to dispatch memory access
     uint8_t Read(uint16_t address) const;
@@ -38,7 +39,7 @@ public:
 
     CPU::CpuState ExecuteInstrFromArray(const uint8_t* instructions, size_t number);
 
-private:
+protected:
     // Peripherals attached to the NES
     CPU cpu;
 
