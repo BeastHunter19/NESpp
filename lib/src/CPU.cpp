@@ -26,6 +26,264 @@ CPU::CPU(NES* mainBus)
     // TODO: initialize APU registers
 
     Reset();
+
+    opcodeTable = {
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x00
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x01
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x02
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x03
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x04
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x05
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x06
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x07
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x08
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x09
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x0A
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x0B
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x0C
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x0D
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x0E
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x0F
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x10
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x11
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x12
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x13
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x14
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x15
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x16
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x17
+        {&CPU::CLC<&CPU::Implied>, "CLC", 1, 2},         // 0x18
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x19
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x1A
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x1B
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x1C
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x1D
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x1E
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x1F
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x20
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x21
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x22
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x23
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x24
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x25
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x26
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x27
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x28
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x29
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x2A
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x2B
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x2C
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x2D
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x2E
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x2F
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x30
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x31
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x32
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x33
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x34
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x35
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x36
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x37
+        {&CPU::SEC<&CPU::Implied>, "SEC", 1, 2},         // 0x38
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x39
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x3A
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x3B
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x3C
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x3D
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x3E
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x3F
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x40
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x41
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x42
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x43
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x44
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x45
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x46
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x47
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x48
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x49
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x4A
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x4B
+        {&CPU::JMP<&CPU::Absolute>, "JMP", 3, 3},        // 0x4C
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x4D
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x4E
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x4F
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x50
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x51
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x52
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x53
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x54
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x55
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x56
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x57
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x58
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x59
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x5A
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x5B
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x5C
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x5D
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x5E
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x5F
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x60
+        {&CPU::ADC<&CPU::IndexedIndirect>, "ADC", 2, 6}, // 0x61
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x62
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x63
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x64
+        {&CPU::ADC<&CPU::ZeroPage>, "ADC", 2, 3},        // 0x65
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x66
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x67
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x68
+        {&CPU::ADC<&CPU::Immediate>, "ADC", 2, 2},       // 0x69
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x6A
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x6B
+        {&CPU::JMP<&CPU::Indirect>, "JMP", 3, 5},        // 0x6C
+        {&CPU::ADC<&CPU::Absolute>, "ADC", 3, 4},        // 0x6D
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x6E
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x6F
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x70
+        {&CPU::ADC<&CPU::IndirectIndexed>, "ADC", 2, 5}, // 0x71
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x72
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x73
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x74
+        {&CPU::ADC<&CPU::ZeroPageX>, "ADC", 2, 4},       // 0x75
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x76
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x77
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x78
+        {&CPU::ADC<&CPU::AbsoluteY>, "ADC", 3, 4},       // 0x79
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x7A
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x7B
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x7C
+        {&CPU::ADC<&CPU::AbsoluteX>, "ADC", 3, 4},       // 0x7D
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x7E
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x7F
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x80
+        {&CPU::STA<&CPU::IndexedIndirect>, "STA", 2, 6}, // 0x81
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x82
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x83
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x84
+        {&CPU::STA<&CPU::ZeroPage>, "STA", 2, 3},        // 0x85
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x86
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x87
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x88
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x89
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x8A
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x8B
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x8C
+        {&CPU::STA<&CPU::Absolute>, "STA", 3, 4},        // 0x8D
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x8E
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x8F
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x90
+        {&CPU::STA<&CPU::IndirectIndexed>, "STA", 2, 6}, // 0x91
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x92
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x93
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x94
+        {&CPU::STA<&CPU::ZeroPageX>, "STA", 2, 4},       // 0x95
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x96
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x97
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x98
+        {&CPU::STA<&CPU::AbsoluteY>, "STA", 3, 5},       // 0x99
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x9A
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x9B
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x9C
+        {&CPU::STA<&CPU::AbsoluteX>, "STA", 3, 5},       // 0x9D
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x9E
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0x9F
+        {&CPU::LDY<&CPU::Immediate>, "LDY", 2, 2},       // 0xA0
+        {&CPU::LDA<&CPU::IndexedIndirect>, "LDA", 2, 6}, // 0xA1
+        {&CPU::LDX<&CPU::Immediate>, "LDX", 2, 2},       // 0xA2
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xA3
+        {&CPU::LDY<&CPU::ZeroPage>, "LDY", 2, 3},        // 0xA4
+        {&CPU::LDA<&CPU::ZeroPage>, "LDA", 2, 3},        // 0xA5
+        {&CPU::LDX<&CPU::ZeroPage>, "LDX", 2, 3},        // 0xA6
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xA7
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xA8
+        {&CPU::LDA<&CPU::Immediate>, "LDA", 2, 2},       // 0xA9
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xAA
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xAB
+        {&CPU::LDY<&CPU::Absolute>, "LDY", 3, 4},        // 0xAC
+        {&CPU::LDA<&CPU::Absolute>, "LDA", 3, 4},        // 0xAD
+        {&CPU::LDX<&CPU::Absolute>, "LDX", 3, 4},        // 0xAE
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xAF
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xB0
+        {&CPU::LDA<&CPU::IndirectIndexed>, "LDA", 2, 5}, // 0xB1
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xB2
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xB3
+        {&CPU::LDY<&CPU::ZeroPageX>, "LDY", 2, 4},       // 0xB4
+        {&CPU::LDA<&CPU::ZeroPageX>, "LDA", 2, 4},       // 0xB5
+        {&CPU::LDX<&CPU::ZeroPageY>, "LDX", 2, 4},       // 0xB6
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xB7
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xB8
+        {&CPU::LDA<&CPU::AbsoluteY>, "LDA", 3, 4},       // 0xB9
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xBA
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xBB
+        {&CPU::LDY<&CPU::AbsoluteX>, "LDY", 3, 4},       // 0xBC
+        {&CPU::LDA<&CPU::AbsoluteX>, "LDA", 3, 4},       // 0xBD
+        {&CPU::LDX<&CPU::AbsoluteY>, "LDX", 3, 4},       // 0xBE
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xBF
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xC0
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xC1
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xC2
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xC3
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xC4
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xC5
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xC6
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xC7
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xC8
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xC9
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xCA
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xCB
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xCC
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xCD
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xCE
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xCF
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xD0
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xD1
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xD2
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xD3
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xD4
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xD5
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xD6
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xD7
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xD8
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xD9
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xDA
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xDB
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xDC
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xDD
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xDE
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xDF
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xE0
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xE1
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xE2
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xE3
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xE4
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xE5
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xE6
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xE7
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xE8
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xE9
+        {&CPU::NOP<&CPU::Implied>, "NOP", 1, 2},         // 0xEA
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xEB
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xEC
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xED
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xEE
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xEF
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xF0
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xF1
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xF2
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xF3
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xF4
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xF5
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xF6
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xF7
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xF8
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xF9
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xFA
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xFB
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xFC
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xFD
+        {&CPU::Illegal, "ILL", 1, 2},                    // 0xFE
+    };
 }
 
 void CPU::LoadInstrFromArray(const uint8_t* instructions, size_t number)
@@ -40,7 +298,7 @@ void CPU::LoadInstrFromArray(const uint8_t* instructions, size_t number)
     while (PC < (0x0700 + number) && cycleCount < CYCLES_PER_FRAME)
     {
         opcode = Read(PC++);
-        ExecuteInstruction(opcode);
+        ExecuteInstruction();
     }
 }
 
@@ -68,268 +326,10 @@ void CPU::Reset()
     PC = (PCH << 8) | PCL;
 }
 
-void CPU::ExecuteInstruction(uint8_t opcode)
+void CPU::ExecuteInstruction()
 {
-    switch (opcode)
-    {
-    case 0x00: Illegal(); break;
-    case 0x01: Illegal(); break;
-    case 0x02: Illegal(); break;
-    case 0x03: Illegal(); break;
-    case 0x04: Illegal(); break;
-    case 0x05: Illegal(); break;
-    case 0x06: Illegal(); break;
-    case 0x07: Illegal(); break;
-    case 0x08: Illegal(); break;
-    case 0x09: Illegal(); break;
-    case 0x0A: Illegal(); break;
-    case 0x0B: Illegal(); break;
-    case 0x0C: Illegal(); break;
-    case 0x0D: Illegal(); break;
-    case 0x0E: Illegal(); break;
-    case 0x0F: Illegal(); break;
-    case 0x10: Illegal(); break;
-    case 0x11: Illegal(); break;
-    case 0x12: Illegal(); break;
-    case 0x13: Illegal(); break;
-    case 0x14: Illegal(); break;
-    case 0x15: Illegal(); break;
-    case 0x16: Illegal(); break;
-    case 0x17: Illegal(); break;
-    case 0x18: CLC<&CPU::Implied>(); break;
-    case 0x19: Illegal(); break;
-    case 0x1A: Illegal(); break;
-    case 0x1B: Illegal(); break;
-    case 0x1C: Illegal(); break;
-    case 0x1D: Illegal(); break;
-    case 0x1E: Illegal(); break;
-    case 0x1F: Illegal(); break;
-    case 0x20: Illegal(); break;
-    case 0x21: Illegal(); break;
-    case 0x22: Illegal(); break;
-    case 0x23: Illegal(); break;
-    case 0x24: Illegal(); break;
-    case 0x25: Illegal(); break;
-    case 0x26: Illegal(); break;
-    case 0x27: Illegal(); break;
-    case 0x28: Illegal(); break;
-    case 0x29: Illegal(); break;
-    case 0x2A: Illegal(); break;
-    case 0x2B: Illegal(); break;
-    case 0x2C: Illegal(); break;
-    case 0x2D: Illegal(); break;
-    case 0x2E: Illegal(); break;
-    case 0x2F: Illegal(); break;
-    case 0x30: Illegal(); break;
-    case 0x31: Illegal(); break;
-    case 0x32: Illegal(); break;
-    case 0x33: Illegal(); break;
-    case 0x34: Illegal(); break;
-    case 0x35: Illegal(); break;
-    case 0x36: Illegal(); break;
-    case 0x37: Illegal(); break;
-    case 0x38: SEC<&CPU::Implied>(); break;
-    case 0x39: Illegal(); break;
-    case 0x3A: Illegal(); break;
-    case 0x3B: Illegal(); break;
-    case 0x3C: Illegal(); break;
-    case 0x3D: Illegal(); break;
-    case 0x3E: Illegal(); break;
-    case 0x3F: Illegal(); break;
-    case 0x40: Illegal(); break;
-    case 0x41: Illegal(); break;
-    case 0x42: Illegal(); break;
-    case 0x43: Illegal(); break;
-    case 0x44: Illegal(); break;
-    case 0x45: Illegal(); break;
-    case 0x46: Illegal(); break;
-    case 0x47: Illegal(); break;
-    case 0x48: Illegal(); break;
-    case 0x49: Illegal(); break;
-    case 0x4A: Illegal(); break;
-    case 0x4B: Illegal(); break;
-    case 0x4C: JMP<&CPU::Absolute>(); break;
-    case 0x4D: Illegal(); break;
-    case 0x4E: Illegal(); break;
-    case 0x4F: Illegal(); break;
-    case 0x50: Illegal(); break;
-    case 0x51: Illegal(); break;
-    case 0x52: Illegal(); break;
-    case 0x53: Illegal(); break;
-    case 0x54: Illegal(); break;
-    case 0x55: Illegal(); break;
-    case 0x56: Illegal(); break;
-    case 0x57: Illegal(); break;
-    case 0x58: Illegal(); break;
-    case 0x59: Illegal(); break;
-    case 0x5A: Illegal(); break;
-    case 0x5B: Illegal(); break;
-    case 0x5C: Illegal(); break;
-    case 0x5D: Illegal(); break;
-    case 0x5E: Illegal(); break;
-    case 0x5F: Illegal(); break;
-    case 0x60: Illegal(); break;
-    case 0x61: ADC<&CPU::IndexedIndirect>(); break;
-    case 0x62: Illegal(); break;
-    case 0x63: Illegal(); break;
-    case 0x64: Illegal(); break;
-    case 0x65: ADC<&CPU::ZeroPage>(); break;
-    case 0x66: Illegal(); break;
-    case 0x67: Illegal(); break;
-    case 0x68: Illegal(); break;
-    case 0x69: ADC<&CPU::Immediate>(); break;
-    case 0x6A: Illegal(); break;
-    case 0x6B: Illegal(); break;
-    case 0x6C: JMP<&CPU::Indirect>(); break;
-    case 0x6D: ADC<&CPU::Absolute>(); break;
-    case 0x6E: Illegal(); break;
-    case 0x6F: Illegal(); break;
-    case 0x70: Illegal(); break;
-    case 0x71: ADC<&CPU::IndirectIndexed>(); break;
-    case 0x72: Illegal(); break;
-    case 0x73: Illegal(); break;
-    case 0x74: Illegal(); break;
-    case 0x75: ADC<&CPU::ZeroPageX>(); break;
-    case 0x76: Illegal(); break;
-    case 0x77: Illegal(); break;
-    case 0x78: Illegal(); break;
-    case 0x79: ADC<&CPU::AbsoluteY>(); break;
-    case 0x7A: Illegal(); break;
-    case 0x7B: Illegal(); break;
-    case 0x7C: Illegal(); break;
-    case 0x7D: ADC<&CPU::AbsoluteX>(); break;
-    case 0x7E: Illegal(); break;
-    case 0x7F: Illegal(); break;
-    case 0x80: Illegal(); break;
-    case 0x81: STA<&CPU::IndexedIndirect>(); break;
-    case 0x82: Illegal(); break;
-    case 0x83: Illegal(); break;
-    case 0x84: Illegal(); break;
-    case 0x85: STA<&CPU::ZeroPage>(); break;
-    case 0x86: Illegal(); break;
-    case 0x87: Illegal(); break;
-    case 0x88: Illegal(); break;
-    case 0x89: Illegal(); break;
-    case 0x8A: Illegal(); break;
-    case 0x8B: Illegal(); break;
-    case 0x8C: Illegal(); break;
-    case 0x8D: STA<&CPU::Absolute>(); break;
-    case 0x8E: Illegal(); break;
-    case 0x8F: Illegal(); break;
-    case 0x90: Illegal(); break;
-    case 0x91: STA<&CPU::IndirectIndexed>(); break;
-    case 0x92: Illegal(); break;
-    case 0x93: Illegal(); break;
-    case 0x94: Illegal(); break;
-    case 0x95: STA<&CPU::ZeroPageX>(); break;
-    case 0x96: Illegal(); break;
-    case 0x97: Illegal(); break;
-    case 0x98: Illegal(); break;
-    case 0x99: STA<&CPU::AbsoluteY>(); break;
-    case 0x9A: Illegal(); break;
-    case 0x9B: Illegal(); break;
-    case 0x9C: Illegal(); break;
-    case 0x9D: STA<&CPU::AbsoluteX>(); break;
-    case 0x9E: Illegal(); break;
-    case 0x9F: Illegal(); break;
-    case 0xA0: LDY<&CPU::Immediate>(); break;
-    case 0xA1: LDA<&CPU::IndexedIndirect>(); break;
-    case 0xA2: LDX<&CPU::Immediate>(); break;
-    case 0xA3: Illegal(); break;
-    case 0xA4: LDY<&CPU::ZeroPage>(); break;
-    case 0xA5: LDA<&CPU::ZeroPage>(); break;
-    case 0xA6: LDX<&CPU::ZeroPage>(); break;
-    case 0xA7: Illegal(); break;
-    case 0xA8: Illegal(); break;
-    case 0xA9: LDA<&CPU::Immediate>(); break;
-    case 0xAA: Illegal(); break;
-    case 0xAB: Illegal(); break;
-    case 0xAC: LDY<&CPU::Absolute>(); break;
-    case 0xAD: LDA<&CPU::Absolute>(); break;
-    case 0xAE: LDX<&CPU::Absolute>(); break;
-    case 0xAF: Illegal(); break;
-    case 0xB0: Illegal(); break;
-    case 0xB1: LDA<&CPU::IndirectIndexed>(); break;
-    case 0xB2: Illegal(); break;
-    case 0xB3: Illegal(); break;
-    case 0xB4: LDY<&CPU::ZeroPageX>(); break;
-    case 0xB5: LDA<&CPU::ZeroPageX>(); break;
-    case 0xB6: LDX<&CPU::ZeroPageY>(); break;
-    case 0xB7: Illegal(); break;
-    case 0xB8: Illegal(); break;
-    case 0xB9: LDA<&CPU::AbsoluteY>(); break;
-    case 0xBA: Illegal(); break;
-    case 0xBB: Illegal(); break;
-    case 0xBC: LDY<&CPU::AbsoluteX>(); break;
-    case 0xBD: LDA<&CPU::AbsoluteX>(); break;
-    case 0xBE: LDX<&CPU::AbsoluteY>(); break;
-    case 0xBF: Illegal(); break;
-    case 0xC0: Illegal(); break;
-    case 0xC1: Illegal(); break;
-    case 0xC2: Illegal(); break;
-    case 0xC3: Illegal(); break;
-    case 0xC4: Illegal(); break;
-    case 0xC5: Illegal(); break;
-    case 0xC6: Illegal(); break;
-    case 0xC7: Illegal(); break;
-    case 0xC8: Illegal(); break;
-    case 0xC9: Illegal(); break;
-    case 0xCA: Illegal(); break;
-    case 0xCB: Illegal(); break;
-    case 0xCC: Illegal(); break;
-    case 0xCD: Illegal(); break;
-    case 0xCE: Illegal(); break;
-    case 0xCF: Illegal(); break;
-    case 0xD0: Illegal(); break;
-    case 0xD1: Illegal(); break;
-    case 0xD2: Illegal(); break;
-    case 0xD3: Illegal(); break;
-    case 0xD4: Illegal(); break;
-    case 0xD5: Illegal(); break;
-    case 0xD6: Illegal(); break;
-    case 0xD7: Illegal(); break;
-    case 0xD8: Illegal(); break;
-    case 0xD9: Illegal(); break;
-    case 0xDA: Illegal(); break;
-    case 0xDB: Illegal(); break;
-    case 0xDC: Illegal(); break;
-    case 0xDD: Illegal(); break;
-    case 0xDE: Illegal(); break;
-    case 0xDF: Illegal(); break;
-    case 0xE0: Illegal(); break;
-    case 0xE1: Illegal(); break;
-    case 0xE2: Illegal(); break;
-    case 0xE3: Illegal(); break;
-    case 0xE4: Illegal(); break;
-    case 0xE5: Illegal(); break;
-    case 0xE6: Illegal(); break;
-    case 0xE7: Illegal(); break;
-    case 0xE8: Illegal(); break;
-    case 0xE9: Illegal(); break;
-    case 0xEA: NOP<&CPU::Implied>(); break;
-    case 0xEB: Illegal(); break;
-    case 0xEC: Illegal(); break;
-    case 0xED: Illegal(); break;
-    case 0xEE: Illegal(); break;
-    case 0xEF: Illegal(); break;
-    case 0xF0: Illegal(); break;
-    case 0xF1: Illegal(); break;
-    case 0xF2: Illegal(); break;
-    case 0xF3: Illegal(); break;
-    case 0xF4: Illegal(); break;
-    case 0xF5: Illegal(); break;
-    case 0xF6: Illegal(); break;
-    case 0xF7: Illegal(); break;
-    case 0xF8: Illegal(); break;
-    case 0xF9: Illegal(); break;
-    case 0xFA: Illegal(); break;
-    case 0xFB: Illegal(); break;
-    case 0xFC: Illegal(); break;
-    case 0xFD: Illegal(); break;
-    case 0xFE: Illegal(); break;
-    case 0xFF: Illegal(); break;
-    }
-    // std::cout << "Executed instruction: " << std::hex << opcode << std::endl;
+    (this->*(opcodeTable[opcode].ptr))();
+    // std::cout << "Executed instruction: " << opcodeTable[opcode].mnemonic << '\n';
 }
 
 void CPU::Tick()

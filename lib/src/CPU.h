@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
+#include <vector>
 
 /*
  * NES CPU (Ricoh RP2A03) is based on the 6502
@@ -53,9 +54,21 @@ public:
     // Is automatically called by constructor
     void Reset();
 
-    void ExecuteInstruction(uint8_t opcode);
+    void ExecuteInstruction();
 
     typedef int (CPU::*AddressModePtr)();
+
+    typedef void (CPU::*InstructionPtr)();
+
+    struct Instruction
+    {
+        InstructionPtr ptr;
+        const char* mnemonic;
+        int bytes;
+        int cycles;
+    };
+
+    std::vector<Instruction> opcodeTable;
 
 private:
     // Reference to the main bus
