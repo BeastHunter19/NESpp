@@ -39,9 +39,3 @@ void NES::ResetRAM()
 {
     RAM.fill(0xFF);
 }
-
-CPU::CpuState NES::ExecuteInstrFromArray(const uint8_t* instructions, size_t number)
-{
-    cpu.LoadInstrFromArray(instructions, number);
-    return cpu.GetCpuState();
-}

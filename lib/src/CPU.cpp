@@ -286,25 +286,15 @@ CPU::CPU(NES* mainBus)
     };
 }
 
-void CPU::LoadInstrFromArray(const uint8_t* instructions, size_t number)
+void CPU::ExecuteInstrFromRAM(uint16_t startingLocation, size_t number)
 {
-    for (size_t instr = 0; instr < number; instr++)
-    {
-        Write(0x0700 + instr, instructions[instr]);
-    }
-
     cycleCount = 0;
-    PC = 0x0700;
-    while (PC < (0x0700 + number) && cycleCount < CYCLES_PER_FRAME)
+    PC = startingLocation;
+    while (PC < (startingLocation + number) && cycleCount < CYCLES_PER_FRAME)
     {
         opcode = Read(PC++);
         ExecuteInstruction();
     }
-}
-
-CPU::CpuState CPU::GetCpuState() const
-{
-    return {SP, A, X, Y, PS.value, PC, cycleCount};
 }
 
 void CPU::Run() {}

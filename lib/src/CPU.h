@@ -24,30 +24,9 @@ class CPU
 public:
     CPU(class NES* mainBus);
 
-    // Assumes the CPU is in a clean state (mostly used for testing).
-    // Can load at most 100 instructions, since they are stored at 0x0700.
-    void LoadInstrFromArray(const uint8_t* instructions, size_t number);
+    friend class Debugger;
 
-    enum CpuStatusFlags : uint8_t
-    {
-        C = 0x01, // carry
-        Z = 0x02, // zero
-        I = 0x04, // interrupt disable
-        D = 0x08, // decimal (unused on NES)
-        B = 0x10, // break
-        _ = 0x20, // unused
-        V = 0x40, // overflow
-        N = 0x80, // negative
-    };
-
-    struct CpuState
-    {
-        uint8_t SP, A, X, Y;
-        BitMappedRegister<CpuStatusFlags> PS;
-        uint16_t PC;
-        uint32_t cycleCount;
-    };
-    CpuState GetCpuState() const;
+    void ExecuteInstrFromRAM(uint16_t startingLocation, size_t number);
 
     void Run();
 
@@ -69,6 +48,18 @@ public:
     };
 
     std::vector<Instruction> opcodeTable;
+
+    enum CpuStatusFlags : uint8_t
+    {
+        C = 0x01, // carry
+        Z = 0x02, // zero
+        I = 0x04, // interrupt disable
+        D = 0x08, // decimal (unused on NES)
+        B = 0x10, // break
+        _ = 0x20, // unused
+        V = 0x40, // overflow
+        N = 0x80, // negative
+    };
 
 private:
     // Reference to the main bus

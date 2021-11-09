@@ -1,4 +1,4 @@
-#include "NES.h"
+#include "NESpp/Debugger.h"
 #include "doctest/doctest.h"
 
 /*
@@ -9,12 +9,12 @@
 
 TEST_CASE("CPU executes all instructions correctly")
 {
-    NES testEmulator;
+    Debugger testEmulator;
 
     SUBCASE("CPU can load instructions from array (executes NOP)")
     {
         uint8_t instructions[]{0xEA};
-        CPU::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 1);
+        Debugger::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 1);
         CHECK(state.cycleCount == 2);
         CHECK(state.PC == 0x0700 + 1);
         CHECK(state.SP == 0xFD);
@@ -27,7 +27,7 @@ TEST_CASE("CPU executes all instructions correctly")
         {
             // ADC #$30
             uint8_t instructions[]{0x69, 0x30};
-            CPU::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 2);
+            Debugger::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 2);
             CHECK(state.A == 0x30);
             CHECK(state.cycleCount == 2);
             CHECK(state.PC == 0x0700 + 2);
@@ -38,7 +38,7 @@ TEST_CASE("CPU executes all instructions correctly")
         {
             // LDA #$11 ; ADC #$1F
             uint8_t instructions[]{0xA9, 0x11, 0x69, 0x1F};
-            CPU::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 4);
+            Debugger::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 4);
             CHECK(state.A == 0x30);
             CHECK(state.cycleCount == 4);
             CHECK(state.PC == 0x0700 + 4);
@@ -49,7 +49,7 @@ TEST_CASE("CPU executes all instructions correctly")
         {
             // SEC ; LDA #$11 ; ADC #$1F
             uint8_t instructions[]{0x38, 0xA9, 0x11, 0x69, 0x1F};
-            CPU::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 5);
+            Debugger::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 5);
             CHECK(state.A == 0x31);
             CHECK(state.cycleCount == 6);
             CHECK(state.PC == 0x0700 + 5);
@@ -60,7 +60,7 @@ TEST_CASE("CPU executes all instructions correctly")
         {
             // LDA #$FE ; ADC #$05
             uint8_t instructions[]{0xA9, 0xFE, 0x69, 0x05};
-            CPU::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 4);
+            Debugger::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 4);
             CHECK(state.A == 0x03);
             CHECK(state.cycleCount == 4);
             CHECK(state.PC == 0x0700 + 4);
@@ -71,7 +71,7 @@ TEST_CASE("CPU executes all instructions correctly")
         {
             // LDA #$7F ; ADC #$01
             uint8_t instructions[]{0xA9, 0x7F, 0x69, 0x01};
-            CPU::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 4);
+            Debugger::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 4);
             CHECK(state.A == 0x80);
             CHECK(state.cycleCount == 4);
             CHECK(state.PC == 0x0700 + 4);
@@ -84,7 +84,7 @@ TEST_CASE("CPU executes all instructions correctly")
     {
         // CLC
         uint8_t instructions[]{0x18};
-        CPU::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 1);
+        Debugger::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 1);
         CHECK(state.cycleCount == 2);
         CHECK(state.PC == 0x0700 + 1);
         CHECK(state.PS.Test<CPU::C>() == 0);
@@ -96,7 +96,7 @@ TEST_CASE("CPU executes all instructions correctly")
         {
             // JMP $03EF
             uint8_t instructions[]{0x4C, 0xEF, 0x07};
-            CPU::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 3);
+            Debugger::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 3);
             CHECK(state.cycleCount == 3);
             CHECK(state.PC == 0x07EF);
         }
@@ -105,7 +105,7 @@ TEST_CASE("CPU executes all instructions correctly")
         {
             // LDA #$EF ; STA $0320 ; LDA #$02 ; STA $0321 ; JMP $(0320)
             uint8_t instructions[]{0xA9, 0xEF, 0x8D, 0x20, 0x03, 0xA9, 0x07, 0x8D, 0x21, 0x03, 0x6C, 0x20, 0x03};
-            CPU::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 13);
+            Debugger::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 13);
             CHECK(state.cycleCount == 17);
             CHECK(state.PC == 0x07EF);
         }
@@ -114,7 +114,7 @@ TEST_CASE("CPU executes all instructions correctly")
         {
             // LDA #$EF ; STA $03FF ; LDA #$02 ; STA $0321 ; JMP $(0320)
             uint8_t instructions[]{0xA9, 0xEF, 0x8D, 0xFF, 0x03, 0xA9, 0x07, 0x8D, 0x00, 0x03, 0x6C, 0xFF, 0x03};
-            CPU::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 13);
+            Debugger::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 13);
             CHECK(state.cycleCount == 17);
             CHECK(state.PC == 0x07EF);
         }
@@ -126,7 +126,7 @@ TEST_CASE("CPU executes all instructions correctly")
         {
             // LDA #$00
             uint8_t instructions[]{0xA9, 0x00};
-            CPU::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 2);
+            Debugger::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 2);
             CHECK(state.cycleCount == 2);
             CHECK(state.PC == 0x0700 + 2);
             CHECK(state.A == 0x00);
@@ -137,7 +137,7 @@ TEST_CASE("CPU executes all instructions correctly")
         {
             // LDA #$7E
             uint8_t instructions[]{0xA9, 0x7E};
-            CPU::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 2);
+            Debugger::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 2);
             CHECK(state.cycleCount == 2);
             CHECK(state.PC == 0x0700 + 2);
             CHECK(state.A == 0x7E);
@@ -148,7 +148,7 @@ TEST_CASE("CPU executes all instructions correctly")
         {
             // LDA #$80
             uint8_t instructions[]{0xA9, 0x80};
-            CPU::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 2);
+            Debugger::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 2);
             CHECK(state.cycleCount == 2);
             CHECK(state.PC == 0x0700 + 2);
             CHECK(state.A == 0x80);
@@ -163,7 +163,7 @@ TEST_CASE("CPU executes all instructions correctly")
         {
             // LDX #$00
             uint8_t instructions[]{0xA2, 0x00};
-            CPU::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 2);
+            Debugger::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 2);
             CHECK(state.cycleCount == 2);
             CHECK(state.PC == 0x0700 + 2);
             CHECK(state.X == 0x00);
@@ -174,7 +174,7 @@ TEST_CASE("CPU executes all instructions correctly")
         {
             // LDX #$7E
             uint8_t instructions[]{0xA2, 0x7E};
-            CPU::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 2);
+            Debugger::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 2);
             CHECK(state.cycleCount == 2);
             CHECK(state.PC == 0x0700 + 2);
             CHECK(state.X == 0x7E);
@@ -185,7 +185,7 @@ TEST_CASE("CPU executes all instructions correctly")
         {
             // LDX #$80
             uint8_t instructions[]{0xA2, 0x80};
-            CPU::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 2);
+            Debugger::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 2);
             CHECK(state.cycleCount == 2);
             CHECK(state.PC == 0x0700 + 2);
             CHECK(state.X == 0x80);
@@ -200,7 +200,7 @@ TEST_CASE("CPU executes all instructions correctly")
         {
             // LDY #$00
             uint8_t instructions[]{0xA0, 0x00};
-            CPU::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 2);
+            Debugger::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 2);
             CHECK(state.cycleCount == 2);
             CHECK(state.PC == 0x0700 + 2);
             CHECK(state.Y == 0x00);
@@ -211,7 +211,7 @@ TEST_CASE("CPU executes all instructions correctly")
         {
             // LDY #$7E
             uint8_t instructions[]{0xA0, 0x7E};
-            CPU::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 2);
+            Debugger::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 2);
             CHECK(state.cycleCount == 2);
             CHECK(state.PC == 0x0700 + 2);
             CHECK(state.Y == 0x7E);
@@ -222,7 +222,7 @@ TEST_CASE("CPU executes all instructions correctly")
         {
             // LDY #$80
             uint8_t instructions[]{0xA0, 0x80};
-            CPU::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 2);
+            Debugger::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 2);
             CHECK(state.cycleCount == 2);
             CHECK(state.PC == 0x0700 + 2);
             CHECK(state.Y == 0x80);
@@ -235,7 +235,7 @@ TEST_CASE("CPU executes all instructions correctly")
     {
         // SEC
         uint8_t instructions[]{0x38};
-        CPU::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 1);
+        Debugger::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 1);
         CHECK(state.cycleCount == 2);
         CHECK(state.PC == 0x0700 + 1);
         CHECK(state.PS.Test<CPU::C>() == 1);
@@ -247,7 +247,7 @@ TEST_CASE("CPU executes all instructions correctly")
         {
             // LDA #$EF ; STA $1F ; LDX $1F
             uint8_t instructions[]{0xA9, 0xEF, 0x85, 0x1F, 0xA6, 0x1F};
-            CPU::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 6);
+            Debugger::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 6);
             CHECK(state.cycleCount == 8);
             CHECK(state.PC == 0x0700 + 6);
             CHECK(state.X == 0xEF);
@@ -256,7 +256,7 @@ TEST_CASE("CPU executes all instructions correctly")
         {
             // LDX #$03 ; LDA #$EF ; STA $FE,x ; LDX $01
             uint8_t instructions[]{0xA2, 0x03, 0xA9, 0xEF, 0x95, 0xFE, 0xA6, 0x01};
-            CPU::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 8);
+            Debugger::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 8);
             CHECK(state.cycleCount == 11);
             CHECK(state.PC == 0x0700 + 8);
             CHECK(state.X == 0xEF);
@@ -265,7 +265,7 @@ TEST_CASE("CPU executes all instructions correctly")
         {
             // LDA #$EF ; STA $0200 ; LDX $0200
             uint8_t instructions[]{0xA9, 0xEF, 0x8D, 0x00, 0x02, 0xAE, 0x00, 0x02};
-            CPU::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 8);
+            Debugger::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 8);
             CHECK(state.cycleCount == 10);
             CHECK(state.PC == 0x0700 + 8);
             CHECK(state.X == 0xEF);
@@ -274,7 +274,7 @@ TEST_CASE("CPU executes all instructions correctly")
         {
             // LDX #$10 ; LDA #$EF ; STA $0200,x ; LDX $0210
             uint8_t instructions[]{0xA2, 0x10, 0xA9, 0xEF, 0x9D, 0x00, 0x02, 0xAE, 0x10, 0x02};
-            CPU::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 10);
+            Debugger::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 10);
             CHECK(state.cycleCount == 13);
             CHECK(state.PC == 0x0700 + 10);
             CHECK(state.X == 0xEF);
@@ -283,7 +283,7 @@ TEST_CASE("CPU executes all instructions correctly")
         {
             // LDY #$10 ; LDA #$EF ; STA $02FE,y ; LDX $0210
             uint8_t instructions[]{0xA0, 0x10, 0xA9, 0xEF, 0x99, 0xFE, 0x02, 0xAE, 0x0E, 0x03};
-            CPU::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 10);
+            Debugger::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 10);
             CHECK(state.cycleCount == 13);
             CHECK(state.PC == 0x0700 + 10);
             CHECK(state.X == 0xEF);
@@ -293,7 +293,7 @@ TEST_CASE("CPU executes all instructions correctly")
             // LDA #$00 ; STA $3F ; LDA #$03 ; STA $40 ; LDA #$EF ; LDX #$20 ; STA ($1F,x) ; LDX $0300
             uint8_t instructions[]{0xA9, 0x00, 0x85, 0x3F, 0xA9, 0x03, 0x85, 0x40, 0xA9,
                                    0xEF, 0xA2, 0x20, 0x81, 0x1F, 0xAE, 0x00, 0x03};
-            CPU::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 17);
+            Debugger::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 17);
             CHECK(state.cycleCount == 24);
             CHECK(state.PC == 0x0700 + 17);
             CHECK(state.X == 0xEF);
@@ -303,7 +303,7 @@ TEST_CASE("CPU executes all instructions correctly")
             // LDA #$00 ; STA $3F ; LDA #$03 ; STA $40 ; LDA #$EF ; LDY #$20 ; STA ($3F),y ; LDX $0320
             uint8_t instructions[]{0xA9, 0x00, 0x85, 0x3F, 0xA9, 0x03, 0x85, 0x40, 0xA9,
                                    0xEF, 0xA0, 0x20, 0x91, 0x3F, 0xAE, 0x20, 0x03};
-            CPU::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 17);
+            Debugger::CpuState state = testEmulator.ExecuteInstrFromArray(instructions, 17);
             CHECK(state.cycleCount == 24);
             CHECK(state.PC == 0x0700 + 17);
             CHECK(state.X == 0xEF);
