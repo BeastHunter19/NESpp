@@ -1,7 +1,7 @@
 #include "NES.h"
 
 NES::NES()
-    : cpu(this)
+    : cpu(*this)
 {
     ResetRAM();
 }

@@ -5,7 +5,7 @@
 #include <iostream>
 #include <sys/types.h>
 
-CPU::CPU(NES* mainBus)
+CPU::CPU(NES& mainBus)
     : mainBus(mainBus)
 {
     cycleCount = 0;
@@ -21,7 +21,7 @@ CPU::CPU(NES* mainBus)
     for (uint16_t lastBits = 0x0000; lastBits <= 0x0013; lastBits++)
     {
         uint16_t address = 0x4000 & lastBits;
-        mainBus->Write(address, 0x00);
+        mainBus.Write(address, 0x00);
     }
     // TODO: initialize APU registers
 
@@ -325,19 +325,19 @@ void CPU::ExecuteInstruction()
 void CPU::Tick()
 {
     cycleCount++;
-    mainBus->Tick();
+    mainBus.Tick();
 }
 
 uint8_t CPU::Read(uint16_t address)
 {
     Tick();
-    return mainBus->Read(address);
+    return mainBus.Read(address);
 }
 
 void CPU::Write(uint16_t address, uint8_t data)
 {
     Tick();
-    mainBus->Write(address, data);
+    mainBus.Write(address, data);
 }
 
 bool CPU::PageCrossed(uint16_t address, uint16_t offset)
