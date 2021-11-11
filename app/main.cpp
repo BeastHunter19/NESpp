@@ -1,4 +1,5 @@
 #include "NESpp/Debugger.h"
+#include "NESpp/Emulator.h"
 #include <iostream>
 #include <memory>
 
@@ -24,11 +25,12 @@ int main(int argc, char** argv)
 {
     std::cout << "Hello, NES!\n\n";
 
-    Debugger emulator;
+    Emulator nes;
+    Debugger debugger(nes);
     uint8_t testRom[]{0xA9, 0x00, 0xA2, 0x1F, 0x9D, 0x00, 0x03, 0xBD, 0x00,
                       0x03, 0x69, 0x01, 0x9D, 0x00, 0x03, 0x4C, 0x07, 0x07};
     Timer t;
-    emulator.ExecuteInstrFromArray(testRom, 18);
+    debugger.ExecuteInstrFromArray(testRom, 18);
 
     return 0;
 }

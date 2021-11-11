@@ -13,7 +13,7 @@ class Emulator : public EmulatorCore
 {
 public:
     Emulator();
-    ~Emulator();
+    ~Emulator() = default;
 
     void Start() { core->ResetRAM(); }
 };

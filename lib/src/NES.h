@@ -23,11 +23,11 @@
  * 0x4020 - 0xFFFF : cartridge space
  */
 
-class MainBus
+class NES
 {
 public:
-    MainBus();
-    virtual ~MainBus() = default;
+    NES();
+    virtual ~NES() = default;
 
     // These are going to dispatch memory access
     uint8_t Read(uint16_t address) const;

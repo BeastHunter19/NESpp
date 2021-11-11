@@ -1,12 +1,12 @@
-#include "MainBus.h"
+#include "NES.h"
 
-MainBus::MainBus()
+NES::NES()
     : cpu(*this)
 {
     ResetRAM();
 }
 
-uint8_t MainBus::Read(uint16_t address) const
+uint8_t NES::Read(uint16_t address) const
 {
     switch (address)
     {
@@ -18,7 +18,7 @@ uint8_t MainBus::Read(uint16_t address) const
     }
 }
 
-void MainBus::Write(uint16_t address, uint8_t data)
+void NES::Write(uint16_t address, uint8_t data)
 {
     switch (address)
     {
@@ -30,12 +30,12 @@ void MainBus::Write(uint16_t address, uint8_t data)
     }
 }
 
-void MainBus::Tick()
+void NES::Tick()
 {
     // TODO: step all the peripherals
 }
 
-void MainBus::ResetRAM()
+void NES::ResetRAM()
 {
     RAM.fill(0xFF);
 }

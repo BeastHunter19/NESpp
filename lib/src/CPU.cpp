@@ -1,11 +1,11 @@
 #include "CPU.h"
-#include "MainBus.h"
+#include "NES.h"
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
 #include <sys/types.h>
 
-CPU::CPU(MainBus& mainBus)
+CPU::CPU(NES& mainBus)
     : mainBus(mainBus)
 {
     cycleCount = 0;
