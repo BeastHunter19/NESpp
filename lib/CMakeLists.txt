@@ -9,8 +9,8 @@ set(
     BitMappedRegister.h
     CPU.h
     CPU.cpp
-    NES.h
-    NES.cpp
+    MainBus.h
+    MainBus.cpp
     Debugger.cpp
     Emulator.cpp
 )

@@ -22,7 +22,7 @@ const uint32_t CYCLES_PER_FRAME = 29781;
 class CPU
 {
 public:
-    CPU(class NES& mainBus);
+    CPU(class MainBus& mainBus);
 
     friend class Debugger;
 
@@ -63,7 +63,7 @@ public:
 
 private:
     // Reference to the main bus
-    NES& mainBus;
+    MainBus& mainBus;
 
     // Program counter
     uint16_t PC;

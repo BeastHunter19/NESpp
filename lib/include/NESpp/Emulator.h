@@ -1,7 +1,7 @@
 #ifndef EMULATOR_H
 #define EMULATOR_H
 
-#include "NES.h"
+#include "EmulatorCore.h"
 
 /*
  * Main emulator class; works as a high level interface to the
@@ -9,13 +9,13 @@
  * application to run games.
  */
 
-class Emulator : private NES
+class Emulator : public EmulatorCore
 {
 public:
     Emulator();
     ~Emulator();
 
-private:
+    void Start() { core->ResetRAM(); }
 };
 
 #endif // EMULATOR_H

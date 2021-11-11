@@ -23,11 +23,11 @@
  * 0x4020 - 0xFFFF : cartridge space
  */
 
-class NES
+class MainBus
 {
 public:
-    NES();
-    virtual ~NES() = default;
+    MainBus();
+    virtual ~MainBus() = default;
 
     // These are going to dispatch memory access
     uint8_t Read(uint16_t address) const;
@@ -36,6 +36,8 @@ public:
     void Tick();
 
     void ResetRAM();
+
+    friend class Debugger;
 
 protected:
     // Peripherals attached to the NES

@@ -1,7 +1,7 @@
 #ifndef DEBUGGER_H
 #define DEBUGGER_H
 
-#include "NES.h"
+#include "EmulatorCore.h"
 
 /*
  * Alternative interface for the NES emulator core.
@@ -11,10 +11,15 @@
  * to create a full featured debugger for the console.
  */
 
-class Debugger : private NES
+class Debugger : public EmulatorCore
 {
 public:
-    Debugger();
+    // The debugger must be initialized from an already existing
+    // object that has a functional emulator core
+    Debugger(const EmulatorCore& other)
+        : EmulatorCore(other)
+    {
+    }
     ~Debugger() = default;
 
     // Assumes the CPU is in a clean state (mostly used for testing).
@@ -36,8 +41,6 @@ public:
     CpuState ExecuteInstrFromArray(const uint8_t* instructions, size_t number, uint16_t startingLocation = 0x0700);
 
     const std::array<uint8_t, 2048>& GetMemoryState() const;
-
-private:
 };
 
 #endif // DEBUGGER_H
