@@ -47,6 +47,9 @@ public:
         int cycles;
     };
 
+    // TODO: try using std::function and a
+    // separate class for opcode representation
+
     std::vector<Instruction> opcodeTable;
 
     enum CpuStatusFlags : uint8_t

@@ -39,7 +39,7 @@ public:
 
     friend class Debugger;
 
-protected:
+private:
     // Peripherals attached to the NES
     CPU cpu;
 
