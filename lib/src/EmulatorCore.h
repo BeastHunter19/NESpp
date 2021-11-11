@@ -9,6 +9,11 @@ public:
     EmulatorCore() { core = std::make_shared<MainBus>(); }
     EmulatorCore(const EmulatorCore& other) { core = other.core; }
     ~EmulatorCore() = default;
+    EmulatorCore& operator=(const EmulatorCore& other)
+    {
+        core = other.core;
+        return *this;
+    }
 
 protected:
     std::shared_ptr<MainBus> core;

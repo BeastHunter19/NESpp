@@ -16,11 +16,9 @@ class Debugger : public EmulatorCore
 public:
     // The debugger must be initialized from an already existing
     // object that has a functional emulator core
-    Debugger(const EmulatorCore& other)
-        : EmulatorCore(other)
-    {
-    }
+    Debugger(const EmulatorCore& other);
     ~Debugger() = default;
+    Debugger& operator=(const EmulatorCore& other);
 
     // Assumes the CPU is in a clean state (mostly used for testing).
     // Loads <number> instructions from the given array starting at

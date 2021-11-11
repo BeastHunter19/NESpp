@@ -1,5 +1,17 @@
 #include "Debugger.h"
+#include "EmulatorCore.h"
 #include <stdexcept>
+
+Debugger::Debugger(const EmulatorCore& other)
+    : EmulatorCore(other)
+{
+}
+
+Debugger& Debugger::operator=(const EmulatorCore& other)
+{
+    *this = EmulatorCore::operator=(other);
+    return *this;
+}
 
 void Debugger::LoadInstrFromArray(const uint8_t* instructions, size_t number, uint16_t startingLocation)
 {
