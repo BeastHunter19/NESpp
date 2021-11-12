@@ -1,9 +1,8 @@
 #include "NESpp/Debugger.h"
 #include "NESpp/Emulator.h"
+#include <chrono>
 #include <iostream>
 #include <memory>
-
-#include <chrono>
 
 struct Timer
 {
@@ -29,8 +28,17 @@ int main(int argc, char** argv)
     Debugger debugger(nes);
     uint8_t testRom[]{0xA9, 0x00, 0xA2, 0x1F, 0x9D, 0x00, 0x03, 0xBD, 0x00,
                       0x03, 0x69, 0x01, 0x9D, 0x00, 0x03, 0x4C, 0x07, 0x07};
-    Timer t;
     debugger.ExecuteInstrFromArray(testRom, 18);
 
+    size_t number;
+    std::string disassembled[256];
+    {
+        Timer t;
+        number = debugger.Disassembly(disassembled, 0x0700, 18);
+    }
+    for (size_t i = 0; i < number; i++)
+    {
+        std::cout << disassembled[i] << '\n';
+    }
     return 0;
 }

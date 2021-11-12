@@ -23,3 +23,4 @@ add_library(NESpp STATIC ${NESpp_SOURCES} ${NESpp_HEADERS})
 
 target_include_directories(NESpp INTERFACE include)
 target_include_directories(NESpp PRIVATE include/NESpp PUBLIC src)
+target_link_libraries(NESpp PRIVATE fmt)

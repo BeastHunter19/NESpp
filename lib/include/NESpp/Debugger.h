@@ -2,6 +2,7 @@
 #define DEBUGGER_H
 
 #include "EmulatorCore.h"
+#include <vector>
 
 /*
  * Alternative interface for the NES emulator core.
@@ -24,7 +25,9 @@ public:
     // Loads <number> instructions from the given array starting at
     // memory location <startingLocation>
     void LoadInstrFromArray(const uint8_t* instructions, size_t number, uint16_t startingLocation = 0x0700);
-    void ShowDisassembly();
+
+    // Outputs the disassembled instructions in outputArray and returns their number
+    size_t Disassembly(std::string* outputArray, uint16_t startingAddress, size_t number);
 
     struct CpuState
     {
@@ -39,6 +42,9 @@ public:
     CpuState ExecuteInstrFromArray(const uint8_t* instructions, size_t number, uint16_t startingLocation = 0x0700);
 
     const std::array<uint8_t, 2048>& GetMemoryState() const;
+
+private:
+    std::vector<CPU::Instruction> instructions;
 };
 
 #endif // DEBUGGER_H
