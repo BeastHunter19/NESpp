@@ -320,6 +320,13 @@ CPU::CPU(NES& mainBus)
     // BCS
     opcodeTable[0xB0] = {&CPU::BCS<&CPU::Relative>, "BCS", REL, 2, 2, true};
 
+    // BEQ
+    opcodeTable[0xF0] = {&CPU::BEQ<&CPU::Relative>, "BEQ", REL, 2, 2, true};
+
+    // BIT
+    opcodeTable[0x24] = {&CPU::BIT<&CPU::ZeroPage>, "BIT", ZP, 2, 3};
+    opcodeTable[0x2C] = {&CPU::BIT<&CPU::Absolute>, "BIT", ABS, 3, 4};
+
     // CLC
     opcodeTable[0x18] = {&CPU::CLC<&CPU::Implied>, "CLC", IMP, 1, 2};
 
@@ -691,6 +698,33 @@ void CPU::BCS()
 {
     int extraCycle = (this->*AddrMode)();
     Branch(PS.Test<C>() == 1, extraCycle);
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::BEQ()
+{
+    int extraCycle = (this->*AddrMode)();
+    Branch(PS.Test<Z>() == 1, extraCycle);
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::BIT()
+{
+    (this->*AddrMode)();
+    uint8_t operand = Read(address);
+    uint8_t result = A & operand;
+    if (result == 0)
+    {
+        PS.Set<Z>();
+    }
+    else
+    {
+        PS.Clear<Z>();
+    }
+    uint8_t memBit6 = (operand & 0x40) >> 6;
+    uint8_t memBit7 = (operand & 0x80) >> 7;
+    PS.Assign<V>(memBit6);
+    PS.Assign<N>(memBit7);
 }
 
 template <CPU::AddressModePtr AddrMode>

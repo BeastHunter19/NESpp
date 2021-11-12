@@ -203,6 +203,62 @@ TEST_CASE("CPU executes all instructions correctly")
         }
     }
 
+    SUBCASE("BEQ")
+    {
+        SUBCASE("Taken")
+        {
+            // AND #$00 ; BEQ +50
+            uint8_t instructions[]{0x29, 0x00, 0xF0, 0x32};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 4);
+            CHECK(state.cycleCount == 5);
+            CHECK(state.PC == 0x0700 + 54);
+        }
+        SUBCASE("Taken with page cross")
+        {
+            // AND #$00 ; BEQ +50
+            uint8_t instructions[]{0x29, 0x00, 0xF0, 0x32};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 4, 0x06FA);
+            CHECK(state.cycleCount == 6);
+            CHECK(state.PC == 0x06FA + 54);
+        }
+        SUBCASE("Not taken")
+        {
+            // ADC #$10 ; BEQ +50
+            uint8_t instructions[]{0x69, 0x10, 0xF0, 0x32};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 4);
+            CHECK(state.cycleCount == 4);
+            CHECK(state.PC == 0x0700 + 4);
+        }
+    }
+
+    SUBCASE("BIT")
+    {
+        SUBCASE("Test true")
+        {
+            // LDA #$CA ; STA $EF ; LDA #$08 ; BIT $EF
+            uint8_t instructions[]{0xA9, 0xCA, 0x85, 0xEF, 0xA9, 0x08, 0x24, 0xEF};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 8);
+            CHECK(state.cycleCount == 10);
+            CHECK(state.PC == 0x0700 + 8);
+            CHECK(state.A == 0x08);
+            CHECK(state.PS.Test<CPU::Z>() == 0);
+            CHECK(state.PS.Test<CPU::N>() == 1);
+            CHECK(state.PS.Test<CPU::V>() == 1);
+        }
+        SUBCASE("Test false")
+        {
+            // LDA #$23 ; STA $EF ; LDA #$0C ; BIT $EF
+            uint8_t instructions[]{0xA9, 0x23, 0x85, 0xEF, 0xA9, 0x0C, 0x24, 0xEF};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 8);
+            CHECK(state.cycleCount == 10);
+            CHECK(state.PC == 0x0700 + 8);
+            CHECK(state.A == 0x0C);
+            CHECK(state.PS.Test<CPU::Z>() == 1);
+            CHECK(state.PS.Test<CPU::N>() == 0);
+            CHECK(state.PS.Test<CPU::V>() == 0);
+        }
+    }
+
     SUBCASE("CLC")
     {
         // CLC
