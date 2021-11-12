@@ -119,6 +119,9 @@ private:
     // Update processor status flags Z and N
     inline void UpdateZN(uint8_t value);
 
+    // Shared logic for branch instructions
+    inline void Branch(bool condition, int extraCycle);
+
     /*
      * The instructions can have different behavior
      * depending on the addressing mode used, which

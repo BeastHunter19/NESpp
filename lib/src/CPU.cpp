@@ -314,6 +314,12 @@ CPU::CPU(NES& mainBus)
     opcodeTable[0x0E] = {&CPU::ASL<&CPU::Absolute>, "ASL", ABS, 3, 6};
     opcodeTable[0x1E] = {&CPU::ASL<&CPU::AbsoluteX>, "ASL", ABSX, 3, 7};
 
+    // BCC
+    opcodeTable[0x90] = {&CPU::BCC<&CPU::Relative>, "BCC", REL, 2, 2, true};
+
+    // BCS
+    opcodeTable[0xB0] = {&CPU::BCS<&CPU::Relative>, "BCS", REL, 2, 2, true};
+
     // CLC
     opcodeTable[0x18] = {&CPU::CLC<&CPU::Implied>, "CLC", IMP, 1, 2};
 
@@ -448,6 +454,19 @@ void CPU::UpdateZN(uint8_t value)
     }
 }
 
+void CPU::Branch(bool condition, int extraCycle)
+{
+    if (condition == true)
+    {
+        if (extraCycle == 1)
+        {
+            Tick();
+        }
+        Tick();
+        PC += address;
+    }
+}
+
 // ADDDRESSING MODES
 
 int CPU::Implied()
@@ -481,11 +500,18 @@ int CPU::Absolute()
     return 0;
 }
 
-// TODO: revisit after implementing branches
 int CPU::Relative()
 {
     uint8_t offset = Read(PC++);
-    return offset;
+    address = offset;
+    if (PageCrossed(PC, offset))
+    {
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
 }
 
 int CPU::Indirect()
@@ -651,6 +677,20 @@ void CPU::ASL()
         UpdateZN(operand);
         Write(address, operand);
     }
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::BCC()
+{
+    int extraCycle = (this->*AddrMode)();
+    Branch(PS.Test<C>() == 0, extraCycle);
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::BCS()
+{
+    int extraCycle = (this->*AddrMode)();
+    Branch(PS.Test<C>() == 1, extraCycle);
 }
 
 template <CPU::AddressModePtr AddrMode>

@@ -147,6 +147,62 @@ TEST_CASE("CPU executes all instructions correctly")
         }
     }
 
+    SUBCASE("BCC")
+    {
+        SUBCASE("Taken")
+        {
+            // CLC ; BCC +50
+            uint8_t instructions[]{0x18, 0x90, 0x32};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 3);
+            CHECK(state.cycleCount == 5);
+            CHECK(state.PC == 0x0700 + 53);
+        }
+        SUBCASE("Taken with page cross")
+        {
+            // CLC ; BCC +50
+            uint8_t instructions[]{0x18, 0x90, 0x32};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 3, 0x06FA);
+            CHECK(state.cycleCount == 6);
+            CHECK(state.PC == 0x06FA + 53);
+        }
+        SUBCASE("Not taken")
+        {
+            // SEC ; BCC +50
+            uint8_t instructions[]{0x38, 0x90, 0x32};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 3);
+            CHECK(state.cycleCount == 4);
+            CHECK(state.PC == 0x0700 + 3);
+        }
+    }
+
+    SUBCASE("BCS")
+    {
+        SUBCASE("Taken")
+        {
+            // SEC ; BCS +50
+            uint8_t instructions[]{0x38, 0xB0, 0x32};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 3);
+            CHECK(state.cycleCount == 5);
+            CHECK(state.PC == 0x0700 + 53);
+        }
+        SUBCASE("Taken with page cross")
+        {
+            // SEC ; BCS +50
+            uint8_t instructions[]{0x38, 0xB0, 0x32};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 3, 0x06FA);
+            CHECK(state.cycleCount == 6);
+            CHECK(state.PC == 0x06FA + 53);
+        }
+        SUBCASE("Not taken")
+        {
+            // CLC ; BCS +50
+            uint8_t instructions[]{0x18, 0xB0, 0x32};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 3);
+            CHECK(state.cycleCount == 4);
+            CHECK(state.PC == 0x0700 + 3);
+        }
+    }
+
     SUBCASE("CLC")
     {
         // CLC
