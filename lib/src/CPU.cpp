@@ -634,6 +634,22 @@ void CPU::ASL()
 {
     if (AddrMode == &CPU::Accumulator)
     {
+        Tick();
+        uint8_t accBit7 = (A & 0x80) >> 7;
+        PS.Assign<C>(accBit7);
+        A = A << 1;
+        UpdateZN(A);
+    }
+    else
+    {
+        (this->*AddrMode)();
+        uint8_t operand = Read(address);
+        Write(address, operand);
+        uint8_t memBit7 = (operand & 0x80) >> 7;
+        PS.Assign<C>(memBit7);
+        operand = operand << 1;
+        UpdateZN(operand);
+        Write(address, operand);
     }
 }
 

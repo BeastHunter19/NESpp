@@ -119,6 +119,34 @@ TEST_CASE("CPU executes all instructions correctly")
         }
     }
 
+    SUBCASE("ASL")
+    {
+        SUBCASE("Accumulator")
+        {
+            // LDA #$B6 ; ASL
+            uint8_t instructions[]{0xA9, 0xB6, 0x0A};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 3);
+            CHECK(state.A == 0x6C);
+            CHECK(state.cycleCount == 4);
+            CHECK(state.PC == 0x0700 + 3);
+            CHECK(state.PS.Test<CPU::N>() == 0);
+            CHECK(state.PS.Test<CPU::Z>() == 0);
+            CHECK(state.PS.Test<CPU::C>() == 1);
+        }
+        SUBCASE("ZeroPage")
+        {
+            // LDA #$62 ; STA $EF ; ASL $EF ; LDX $EF
+            uint8_t instructions[]{0xA9, 0x62, 0x85, 0xEF, 0x06, 0xEF, 0xA6, 0xEF};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 8);
+            CHECK(state.X == 0xC4);
+            CHECK(state.cycleCount == 13);
+            CHECK(state.PC == 0x0700 + 8);
+            CHECK(state.PS.Test<CPU::N>() == 1);
+            CHECK(state.PS.Test<CPU::Z>() == 0);
+            CHECK(state.PS.Test<CPU::C>() == 0);
+        }
+    }
+
     SUBCASE("CLC")
     {
         // CLC
@@ -142,7 +170,7 @@ TEST_CASE("CPU executes all instructions correctly")
 
         SUBCASE("Indirect")
         {
-            // LDA #$EF ; STA $0320 ; LDA #$02 ; STA $0321 ; JMP $(0320)
+            // LDA #$EF ; STA $0320 ; LDA #$07 ; STA $0321 ; JMP $(0320)
             uint8_t instructions[]{0xA9, 0xEF, 0x8D, 0x20, 0x03, 0xA9, 0x07, 0x8D, 0x21, 0x03, 0x6C, 0x20, 0x03};
             Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 13);
             CHECK(state.cycleCount == 17);
@@ -151,7 +179,7 @@ TEST_CASE("CPU executes all instructions correctly")
 
         SUBCASE("Indirect (with wrap around bug)")
         {
-            // LDA #$EF ; STA $03FF ; LDA #$02 ; STA $0321 ; JMP $(0320)
+            // LDA #$EF ; STA $03FF ; LDA #$07 ; STA $0321 ; JMP $(0320)
             uint8_t instructions[]{0xA9, 0xEF, 0x8D, 0xFF, 0x03, 0xA9, 0x07, 0x8D, 0x00, 0x03, 0x6C, 0xFF, 0x03};
             Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 13);
             CHECK(state.cycleCount == 17);
