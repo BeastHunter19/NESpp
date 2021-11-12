@@ -2,10 +2,11 @@
 #define CPU_H
 
 #include "BitMappedRegister.h"
+#include <array>
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
-#include <vector>
+#include <string>
 
 /*
  * NES CPU (Ricoh RP2A03) is based on the 6502
@@ -39,18 +40,37 @@ public:
 
     typedef void (CPU::*InstructionPtr)();
 
+    enum AddressingMode
+    {
+        IMP,
+        ACC,
+        IMM,
+        ZP,
+        ABS,
+        REL,
+        IND,
+        ZPX,
+        ZPY,
+        ABSX,
+        ABSY,
+        INDX,
+        INDY
+    };
+
     struct Instruction
     {
         InstructionPtr ptr;
         const char* mnemonic;
+        AddressingMode mode;
         int bytes;
         int cycles;
+        bool extraCycle = false;
     };
 
     // TODO: try using std::function and a
     // separate class for opcode representation
 
-    std::vector<Instruction> opcodeTable;
+    std::array<Instruction, 256> opcodeTable;
 
     enum CpuStatusFlags : uint8_t
     {

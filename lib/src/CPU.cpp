@@ -27,6 +27,7 @@ CPU::CPU(NES& mainBus)
 
     Reset();
 
+    /*
     opcodeTable = {
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x00
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x01
@@ -34,15 +35,15 @@ CPU::CPU(NES& mainBus)
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x03
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x04
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x05
-        {&CPU::Illegal, "ILL", 1, 2},                    // 0x06
+        {&CPU::ASL<&CPU::ZeroPage>, "ASL", 2, 5},        // 0x06
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x07
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x08
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x09
-        {&CPU::Illegal, "ILL", 1, 2},                    // 0x0A
+        {&CPU::ASL<&CPU::Accumulator>, "ASL", 1, 2},     // 0x0A
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x0B
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x0C
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x0D
-        {&CPU::Illegal, "ILL", 1, 2},                    // 0x0E
+        {&CPU::ASL<&CPU::Absolute>, "ASL", 3, 6},        // 0x0E
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x0F
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x10
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x11
@@ -50,7 +51,7 @@ CPU::CPU(NES& mainBus)
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x13
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x14
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x15
-        {&CPU::Illegal, "ILL", 1, 2},                    // 0x16
+        {&CPU::ASL<&CPU::ZeroPageX>, "ASL", 2, 6},       // 0x16
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x17
         {&CPU::CLC<&CPU::Implied>, "CLC", 1, 2},         // 0x18
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x19
@@ -58,7 +59,7 @@ CPU::CPU(NES& mainBus)
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x1B
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x1C
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x1D
-        {&CPU::Illegal, "ILL", 1, 2},                    // 0x1E
+        {&CPU::ASL<&CPU::AbsoluteX>, "ASL", 3, 7},       // 0x1E
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x1F
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x20
         {&CPU::AND<&CPU::IndexedIndirect>, "AND", 2, 6}, // 0x21
@@ -284,6 +285,80 @@ CPU::CPU(NES& mainBus)
         {&CPU::Illegal, "ILL", 1, 2},                    // 0xFD
         {&CPU::Illegal, "ILL", 1, 2},                    // 0xFE
     };
+    */
+
+    // ADC
+    opcodeTable[0x69] = {&CPU::ADC<&CPU::Immediate>, "ADC", IMM, 2, 2};
+    opcodeTable[0x65] = {&CPU::ADC<&CPU::ZeroPage>, "ADC", ZP, 2, 3};
+    opcodeTable[0x75] = {&CPU::ADC<&CPU::ZeroPageX>, "ADC", ZPX, 2, 4};
+    opcodeTable[0x6D] = {&CPU::ADC<&CPU::Absolute>, "ADC", ABS, 3, 4};
+    opcodeTable[0x7D] = {&CPU::ADC<&CPU::AbsoluteX>, "ADC", ABSX, 3, 4, true};
+    opcodeTable[0x79] = {&CPU::ADC<&CPU::AbsoluteY>, "ADC", ABSY, 3, 4, true};
+    opcodeTable[0x61] = {&CPU::ADC<&CPU::IndexedIndirect>, "ADC", INDX, 2, 6};
+    opcodeTable[0x71] = {&CPU::ADC<&CPU::IndirectIndexed>, "ADC", INDY, 2, 5, true};
+
+    // AND
+    opcodeTable[0x29] = {&CPU::AND<&CPU::Immediate>, "AND", IMM, 2, 2};
+    opcodeTable[0x25] = {&CPU::AND<&CPU::ZeroPage>, "AND", ZP, 2, 3};
+    opcodeTable[0x35] = {&CPU::AND<&CPU::ZeroPageX>, "AND", ZPX, 2, 4};
+    opcodeTable[0x2D] = {&CPU::AND<&CPU::Absolute>, "AND", ABS, 3, 4};
+    opcodeTable[0x3D] = {&CPU::AND<&CPU::AbsoluteX>, "AND", ABSX, 3, 4, true};
+    opcodeTable[0x39] = {&CPU::AND<&CPU::AbsoluteY>, "AND", ABSY, 3, 4, true};
+    opcodeTable[0x21] = {&CPU::AND<&CPU::IndexedIndirect>, "AND", INDX, 2, 6};
+    opcodeTable[0x31] = {&CPU::AND<&CPU::IndirectIndexed>, "AND", INDY, 2, 5, true};
+
+    // ASL
+    opcodeTable[0x0A] = {&CPU::ASL<&CPU::Accumulator>, "ASL", ACC, 1, 2};
+    opcodeTable[0x06] = {&CPU::ASL<&CPU::ZeroPage>, "ASL", ZP, 2, 5};
+    opcodeTable[0x16] = {&CPU::ASL<&CPU::ZeroPageX>, "ASL", ZPX, 2, 6};
+    opcodeTable[0x0E] = {&CPU::ASL<&CPU::Absolute>, "ASL", ABS, 3, 6};
+    opcodeTable[0x1E] = {&CPU::ASL<&CPU::AbsoluteX>, "ASL", ABSX, 3, 7};
+
+    // CLC
+    opcodeTable[0x18] = {&CPU::CLC<&CPU::Implied>, "CLC", IMP, 1, 2};
+
+    // JMP
+    opcodeTable[0x4C] = {&CPU::JMP<&CPU::Absolute>, "JMP", ABS, 3, 3};
+    opcodeTable[0x6C] = {&CPU::JMP<&CPU::Indirect>, "JMP", IND, 3, 5};
+
+    // LDA
+    opcodeTable[0xA9] = {&CPU::LDA<&CPU::Immediate>, "LDA", IMM, 2, 2};
+    opcodeTable[0xA5] = {&CPU::LDA<&CPU::ZeroPage>, "LDA", ZP, 2, 3};
+    opcodeTable[0xB5] = {&CPU::LDA<&CPU::ZeroPageX>, "LDA", ZPX, 2, 4};
+    opcodeTable[0xAD] = {&CPU::LDA<&CPU::Absolute>, "LDA", ABS, 3, 4};
+    opcodeTable[0xBD] = {&CPU::LDA<&CPU::AbsoluteX>, "LDA", ABSX, 3, 4, true};
+    opcodeTable[0xB9] = {&CPU::LDA<&CPU::AbsoluteY>, "LDA", ABSY, 3, 4, true};
+    opcodeTable[0xA1] = {&CPU::LDA<&CPU::IndexedIndirect>, "LDA", INDX, 2, 6};
+    opcodeTable[0xB1] = {&CPU::LDA<&CPU::IndirectIndexed>, "LDA", INDY, 2, 5, true};
+
+    // LDX
+    opcodeTable[0xA2] = {&CPU::LDX<&CPU::Immediate>, "LDX", IMM, 2, 2};
+    opcodeTable[0xA6] = {&CPU::LDX<&CPU::ZeroPage>, "LDX", ZP, 2, 3};
+    opcodeTable[0xB6] = {&CPU::LDX<&CPU::ZeroPageY>, "LDX", ZPY, 2, 4};
+    opcodeTable[0xAE] = {&CPU::LDX<&CPU::Absolute>, "LDX", ABS, 3, 4};
+    opcodeTable[0xBE] = {&CPU::LDX<&CPU::AbsoluteY>, "LDX", ABSY, 3, 4, true};
+
+    // LDY
+    opcodeTable[0xA0] = {&CPU::LDY<&CPU::Immediate>, "LDY", IMM, 2, 2};
+    opcodeTable[0xA4] = {&CPU::LDY<&CPU::ZeroPage>, "LDY", ZP, 2, 3};
+    opcodeTable[0xB4] = {&CPU::LDY<&CPU::ZeroPageX>, "LDY", ZPX, 2, 4};
+    opcodeTable[0xAC] = {&CPU::LDY<&CPU::Absolute>, "LDY", ABS, 3, 4};
+    opcodeTable[0xBC] = {&CPU::LDY<&CPU::AbsoluteX>, "LDY", ABSX, 3, 4, true};
+
+    // NOP
+    opcodeTable[0xEA] = {&CPU::NOP<&CPU::Implied>, "NOP", IMP, 1, 2};
+
+    // SEC
+    opcodeTable[0x38] = {&CPU::SEC<&CPU::Implied>, "SEC", IMP, 1, 2};
+
+    // STA
+    opcodeTable[0x85] = {&CPU::STA<&CPU::ZeroPage>, "STA", ZP, 2, 3};
+    opcodeTable[0x95] = {&CPU::STA<&CPU::ZeroPageX>, "STA", ZPX, 2, 4};
+    opcodeTable[0x8D] = {&CPU::STA<&CPU::Absolute>, "STA", ABS, 3, 4};
+    opcodeTable[0x9D] = {&CPU::STA<&CPU::AbsoluteX>, "STA", ABSX, 3, 5};
+    opcodeTable[0x99] = {&CPU::STA<&CPU::AbsoluteY>, "STA", ABSY, 3, 5};
+    opcodeTable[0x81] = {&CPU::STA<&CPU::IndexedIndirect>, "STA", INDX, 2, 6};
+    opcodeTable[0x91] = {&CPU::STA<&CPU::IndirectIndexed>, "STA", INDY, 2, 6};
 }
 
 void CPU::ExecuteInstrFromRAM(uint16_t startingLocation, size_t number)
