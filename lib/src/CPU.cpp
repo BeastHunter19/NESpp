@@ -61,35 +61,35 @@ CPU::CPU(NES& mainBus)
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x1E
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x1F
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x20
-        {&CPU::Illegal, "ILL", 1, 2},                    // 0x21
+        {&CPU::AND<&CPU::IndexedIndirect>, "AND", 2, 6}, // 0x21
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x22
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x23
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x24
-        {&CPU::Illegal, "ILL", 1, 2},                    // 0x25
+        {&CPU::AND<&CPU::ZeroPage>, "AND", 2, 3},        // 0x25
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x26
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x27
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x28
-        {&CPU::Illegal, "ILL", 1, 2},                    // 0x29
+        {&CPU::AND<&CPU::Immediate>, "AND", 2, 2},       // 0x29
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x2A
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x2B
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x2C
-        {&CPU::Illegal, "ILL", 1, 2},                    // 0x2D
+        {&CPU::AND<&CPU::Absolute>, "AND", 3, 4},        // 0x2D
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x2E
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x2F
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x30
-        {&CPU::Illegal, "ILL", 1, 2},                    // 0x31
+        {&CPU::AND<&CPU::IndirectIndexed>, "AND", 2, 5}, // 0x31
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x32
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x33
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x34
-        {&CPU::Illegal, "ILL", 1, 2},                    // 0x35
+        {&CPU::AND<&CPU::ZeroPageX>, "AND", 2, 4},       // 0x35
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x36
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x37
         {&CPU::SEC<&CPU::Implied>, "SEC", 1, 2},         // 0x38
-        {&CPU::Illegal, "ILL", 1, 2},                    // 0x39
+        {&CPU::AND<&CPU::AbsoluteY>, "AND", 3, 4},       // 0x39
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x3A
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x3B
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x3C
-        {&CPU::Illegal, "ILL", 1, 2},                    // 0x3D
+        {&CPU::AND<&CPU::AbsoluteX>, "AND", 3, 4},       // 0x3D
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x3E
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x3F
         {&CPU::Illegal, "ILL", 1, 2},                    // 0x40
@@ -535,6 +535,26 @@ void CPU::ADC()
         PS.Clear<V>();
     }
     A = result;
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::AND()
+{
+    if ((this->*AddrMode)() == 1)
+    {
+        Tick();
+    }
+    uint8_t operand = Read(address);
+    A &= operand;
+    UpdateZN(A);
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::ASL()
+{
+    if (AddrMode == &CPU::Accumulator)
+    {
+    }
 }
 
 template <CPU::AddressModePtr AddrMode>

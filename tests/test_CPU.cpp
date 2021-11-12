@@ -82,6 +82,43 @@ TEST_CASE("CPU executes all instructions correctly")
         }
     }
 
+    SUBCASE("AND")
+    {
+        SUBCASE("Result is zero")
+        {
+            // LDA #$32 ; AND #$E5
+            uint8_t instructions[]{0xA9, 0x32, 0x29, 0x00};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 4);
+            CHECK(state.A == 0x00);
+            CHECK(state.cycleCount == 4);
+            CHECK(state.PC == 0x0700 + 4);
+            CHECK(state.PS.Test<CPU::N>() == 0);
+            CHECK(state.PS.Test<CPU::Z>() == 1);
+        }
+        SUBCASE("Result is positive")
+        {
+            // LDA #$32 ; AND #$E5
+            uint8_t instructions[]{0xA9, 0x32, 0x29, 0xE5};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 4);
+            CHECK(state.A == 0x20);
+            CHECK(state.cycleCount == 4);
+            CHECK(state.PC == 0x0700 + 4);
+            CHECK(state.PS.Test<CPU::N>() == 0);
+            CHECK(state.PS.Test<CPU::Z>() == 0);
+        }
+        SUBCASE("Result is negative")
+        {
+            // LDA #$32 ; AND #$E5
+            uint8_t instructions[]{0xA9, 0x82, 0x29, 0xE5};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 4);
+            CHECK(state.A == 0x80);
+            CHECK(state.cycleCount == 4);
+            CHECK(state.PC == 0x0700 + 4);
+            CHECK(state.PS.Test<CPU::N>() == 1);
+            CHECK(state.PS.Test<CPU::Z>() == 0);
+        }
+    }
+
     SUBCASE("CLC")
     {
         // CLC
