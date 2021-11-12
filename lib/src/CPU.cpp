@@ -380,6 +380,11 @@ int CPU::Implied()
     return 0;
 }
 
+int CPU::Accumulator()
+{
+    return 0;
+}
+
 int CPU::Immediate()
 {
     address = PC++;

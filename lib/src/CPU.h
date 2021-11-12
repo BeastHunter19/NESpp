@@ -120,6 +120,9 @@ private:
     // The operand is implicit in the instruction
     inline int Implied();
 
+    // The operand is the accumulator
+    inline int Accumulator();
+
     // Uses a 8 bit operand directly without memory access
     inline int Immediate();
 
