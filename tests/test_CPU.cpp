@@ -259,6 +259,90 @@ TEST_CASE("CPU executes all instructions correctly")
         }
     }
 
+    SUBCASE("BMI")
+    {
+        SUBCASE("Taken")
+        {
+            // LDA #$80 ; BMI +50
+            uint8_t instructions[]{0xA9, 0x80, 0x30, 0x32};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 4);
+            CHECK(state.cycleCount == 5);
+            CHECK(state.PC == 0x0700 + 54);
+        }
+        SUBCASE("Taken with page cross")
+        {
+            // LDA #$80 ; BMI +50
+            uint8_t instructions[]{0xA9, 0x80, 0x30, 0x32};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 4, 0x06FA);
+            CHECK(state.cycleCount == 6);
+            CHECK(state.PC == 0x06FA + 54);
+        }
+        SUBCASE("Not taken")
+        {
+            // LDA #$40 ; BMI +50
+            uint8_t instructions[]{0xA9, 0x40, 0x30, 0x32};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 4);
+            CHECK(state.cycleCount == 4);
+            CHECK(state.PC == 0x0700 + 4);
+        }
+    }
+
+    SUBCASE("BNE")
+    {
+        SUBCASE("Taken")
+        {
+            // ADC #$10 ; BNE +50
+            uint8_t instructions[]{0x69, 0x10, 0xD0, 0x32};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 4);
+            CHECK(state.cycleCount == 5);
+            CHECK(state.PC == 0x0700 + 54);
+        }
+        SUBCASE("Taken with page cross")
+        {
+            // ADC #$10 ; BNE +50
+            uint8_t instructions[]{0x69, 0x10, 0xD0, 0x32};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 4, 0x06FA);
+            CHECK(state.cycleCount == 6);
+            CHECK(state.PC == 0x06FA + 54);
+        }
+        SUBCASE("Not taken")
+        {
+            // ADC #$00 ; BNE +50
+            uint8_t instructions[]{0x69, 0x00, 0xD0, 0x32};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 4);
+            CHECK(state.cycleCount == 4);
+            CHECK(state.PC == 0x0700 + 4);
+        }
+    }
+
+    SUBCASE("BPL")
+    {
+        SUBCASE("Taken")
+        {
+            // LDA #$40 ; BPL +50
+            uint8_t instructions[]{0xA9, 0x40, 0x10, 0x32};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 4);
+            CHECK(state.cycleCount == 5);
+            CHECK(state.PC == 0x0700 + 54);
+        }
+        SUBCASE("Taken with page cross")
+        {
+            // LDA #$40 ; BPL +50
+            uint8_t instructions[]{0xA9, 0x40, 0x10, 0x32};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 4, 0x06FA);
+            CHECK(state.cycleCount == 6);
+            CHECK(state.PC == 0x06FA + 54);
+        }
+        SUBCASE("Not taken")
+        {
+            // LDA #$80 ; BPL +50
+            uint8_t instructions[]{0xA9, 0x80, 0x10, 0x32};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 4);
+            CHECK(state.cycleCount == 4);
+            CHECK(state.PC == 0x0700 + 4);
+        }
+    }
+
     SUBCASE("CLC")
     {
         // CLC

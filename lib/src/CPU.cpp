@@ -327,6 +327,15 @@ CPU::CPU(NES& mainBus)
     opcodeTable[0x24] = {&CPU::BIT<&CPU::ZeroPage>, "BIT", ZP, 2, 3};
     opcodeTable[0x2C] = {&CPU::BIT<&CPU::Absolute>, "BIT", ABS, 3, 4};
 
+    // BMI
+    opcodeTable[0x30] = {&CPU::BMI<&CPU::Relative>, "BMI", REL, 2, 2, true};
+
+    // BNE
+    opcodeTable[0xD0] = {&CPU::BNE<&CPU::Relative>, "BNE", REL, 2, 2, true};
+
+    // BPL
+    opcodeTable[0x10] = {&CPU::BPL<&CPU::Relative>, "BPL", REL, 2, 2, true};
+
     // CLC
     opcodeTable[0x18] = {&CPU::CLC<&CPU::Implied>, "CLC", IMP, 1, 2};
 
@@ -725,6 +734,27 @@ void CPU::BIT()
     uint8_t memBit7 = (operand & 0x80) >> 7;
     PS.Assign<V>(memBit6);
     PS.Assign<N>(memBit7);
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::BMI()
+{
+    int extraCycle = (this->*AddrMode)();
+    Branch(PS.Test<N>() == 1, extraCycle);
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::BNE()
+{
+    int extraCycle = (this->*AddrMode)();
+    Branch(PS.Test<Z>() == 0, extraCycle);
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::BPL()
+{
+    int extraCycle = (this->*AddrMode)();
+    Branch(PS.Test<N>() == 0, extraCycle);
 }
 
 template <CPU::AddressModePtr AddrMode>
