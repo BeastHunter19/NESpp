@@ -115,7 +115,7 @@ size_t Debugger::Disassembly(std::string* outputArray, uint16_t startingAddress,
 Debugger::CpuState Debugger::ExecuteInstrFromArray(const uint8_t* instructions, size_t number,
                                                    uint16_t startingLocation)
 {
-    LoadInstrFromArray(instructions, number);
+    LoadInstrFromArray(instructions, number, startingLocation);
     core->cpu.ExecuteInstrFromRAM(startingLocation, number);
     return GetCpuState();
 }
