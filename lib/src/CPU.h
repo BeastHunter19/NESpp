@@ -122,6 +122,13 @@ private:
     // Shared logic for branch instructions
     inline void Branch(bool condition, int extraCycle);
 
+    // Access stack (locations 0x0100-0x01FF)
+    inline void PushStack(uint8_t value);
+    inline uint8_t PopStack();
+
+    // Compares the values setting flags accordingly
+    inline void Compare(uint8_t reg, uint8_t operand);
+
     /*
      * The instructions can have different behavior
      * depending on the addressing mode used, which

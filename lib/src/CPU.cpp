@@ -336,8 +336,46 @@ CPU::CPU(NES& mainBus)
     // BPL
     opcodeTable[0x10] = {&CPU::BPL<&CPU::Relative>, "BPL", REL, 2, 2, true};
 
+    // BRK
+    opcodeTable[0x00] = {&CPU::BRK<&CPU::Implied>, "BRK", IMP, 1, 7};
+
+    // BVC
+    opcodeTable[0x50] = {&CPU::BVC<&CPU::Relative>, "BVC", REL, 2, 2, true};
+
+    // BVS
+    opcodeTable[0x70] = {&CPU::BVS<&CPU::Relative>, "BVS", REL, 2, 2, true};
+
     // CLC
     opcodeTable[0x18] = {&CPU::CLC<&CPU::Implied>, "CLC", IMP, 1, 2};
+
+    // CLD
+    opcodeTable[0xD8] = {&CPU::CLD<&CPU::Implied>, "CLD", IMP, 1, 2};
+
+    // CLI
+    opcodeTable[0x58] = {&CPU::CLI<&CPU::Implied>, "CLI", IMP, 1, 2};
+
+    // CLV
+    opcodeTable[0xB8] = {&CPU::CLV<&CPU::Implied>, "CLV", IMP, 1, 2};
+
+    // CMP
+    opcodeTable[0xC9] = {&CPU::CMP<&CPU::Immediate>, "CMP", IMM, 2, 2};
+    opcodeTable[0xC5] = {&CPU::CMP<&CPU::ZeroPage>, "CMP", ZP, 2, 3};
+    opcodeTable[0xD5] = {&CPU::CMP<&CPU::ZeroPageX>, "CMP", ZPX, 2, 4};
+    opcodeTable[0xCD] = {&CPU::CMP<&CPU::Absolute>, "CMP", ABS, 3, 4};
+    opcodeTable[0xDD] = {&CPU::CMP<&CPU::AbsoluteX>, "CMP", ABSX, 3, 4, true};
+    opcodeTable[0xD9] = {&CPU::CMP<&CPU::AbsoluteY>, "CMP", ABSY, 3, 4, true};
+    opcodeTable[0xC1] = {&CPU::CMP<&CPU::IndexedIndirect>, "CMP", INDX, 2, 6};
+    opcodeTable[0xD1] = {&CPU::CMP<&CPU::IndirectIndexed>, "CMP", INDY, 2, 5, true};
+
+    // CPX
+    opcodeTable[0xE0] = {&CPU::CPX<&CPU::Immediate>, "CPX", IMM, 2, 2};
+    opcodeTable[0xE4] = {&CPU::CPX<&CPU::ZeroPage>, "CPX", ZP, 2, 3};
+    opcodeTable[0xEC] = {&CPU::CPX<&CPU::Absolute>, "CPX", ABS, 3, 4};
+
+    // CPX
+    opcodeTable[0xC0] = {&CPU::CPY<&CPU::Immediate>, "CPY", IMM, 2, 2};
+    opcodeTable[0xC4] = {&CPU::CPY<&CPU::ZeroPage>, "CPY", ZP, 2, 3};
+    opcodeTable[0xCC] = {&CPU::CPY<&CPU::Absolute>, "CPY", ABS, 3, 4};
 
     // JMP
     opcodeTable[0x4C] = {&CPU::JMP<&CPU::Absolute>, "JMP", ABS, 3, 3};
@@ -481,6 +519,40 @@ void CPU::Branch(bool condition, int extraCycle)
         Tick();
         PC += address;
     }
+}
+
+void CPU::PushStack(uint8_t value)
+{
+    Write(0x0100 + SP, value);
+    SP--;
+}
+
+uint8_t CPU::PopStack()
+{
+    SP++;
+    return Read(0x0100 + SP);
+}
+
+void CPU::Compare(uint8_t reg, uint8_t operand)
+{
+    if (reg >= operand)
+    {
+        PS.Set<C>();
+    }
+    else
+    {
+        PS.Clear<C>();
+    }
+    if (reg == operand)
+    {
+        PS.Set<Z>();
+    }
+    else
+    {
+        PS.Clear<Z>();
+    }
+    uint8_t memBit7 = ((reg - operand) & 0x80) >> 7;
+    PS.Assign<N>(memBit7);
 }
 
 // ADDDRESSING MODES
@@ -758,10 +830,88 @@ void CPU::BPL()
 }
 
 template <CPU::AddressModePtr AddrMode>
+void CPU::BRK()
+{
+    Tick();
+    PC++;
+    uint8_t PCH = (PC & 0xFF00) >> 8;
+    uint8_t PCL = PC & 0x00FF;
+    PushStack(PCH);
+    PushStack(PCL);
+    PS.Set<B>();
+    PushStack(PS.value);
+    PS.Set<I>();
+    PCL = Read(0xFFFE);
+    PCH = Read(0xFFFF);
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::BVC()
+{
+    int extraCycle = (this->*AddrMode)();
+    Branch(PS.Test<V>() == 0, extraCycle);
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::BVS()
+{
+    int extraCycle = (this->*AddrMode)();
+    Branch(PS.Test<V>() == 1, extraCycle);
+}
+
+template <CPU::AddressModePtr AddrMode>
 void CPU::CLC()
 {
     Tick();
     PS.Clear<C>();
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::CLD()
+{
+    Tick();
+    PS.Clear<D>();
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::CLI()
+{
+    Tick();
+    PS.Clear<I>();
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::CLV()
+{
+    Tick();
+    PS.Clear<V>();
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::CMP()
+{
+    if ((this->*AddrMode)() == 1)
+    {
+        Tick();
+    }
+    uint8_t operand = Read(address);
+    Compare(A, operand);
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::CPX()
+{
+    (this->*AddrMode)();
+    uint8_t operand = Read(address);
+    Compare(X, operand);
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::CPY()
+{
+    (this->*AddrMode)();
+    uint8_t operand = Read(address);
+    Compare(Y, operand);
 }
 
 template <CPU::AddressModePtr AddrMode>
