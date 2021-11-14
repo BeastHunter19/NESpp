@@ -372,10 +372,22 @@ CPU::CPU(NES& mainBus)
     opcodeTable[0xE4] = {&CPU::CPX<&CPU::ZeroPage>, "CPX", ZP, 2, 3};
     opcodeTable[0xEC] = {&CPU::CPX<&CPU::Absolute>, "CPX", ABS, 3, 4};
 
-    // CPX
+    // CPY
     opcodeTable[0xC0] = {&CPU::CPY<&CPU::Immediate>, "CPY", IMM, 2, 2};
     opcodeTable[0xC4] = {&CPU::CPY<&CPU::ZeroPage>, "CPY", ZP, 2, 3};
     opcodeTable[0xCC] = {&CPU::CPY<&CPU::Absolute>, "CPY", ABS, 3, 4};
+
+    // DEC
+    opcodeTable[0xC6] = {&CPU::DEC<&CPU::ZeroPage>, "DEC", ZP, 2, 5};
+    opcodeTable[0xD6] = {&CPU::DEC<&CPU::ZeroPageX>, "DEC", ZPX, 2, 6};
+    opcodeTable[0xCE] = {&CPU::DEC<&CPU::Absolute>, "DEC", ABS, 3, 6};
+    opcodeTable[0xDE] = {&CPU::DEC<&CPU::AbsoluteX>, "DEC", ABSX, 3, 7};
+
+    // DEX
+    opcodeTable[0xCA] = {&CPU::DEX<&CPU::Immediate>, "DEX", IMM, 1, 2};
+
+    // DEY
+    opcodeTable[0x88] = {&CPU::DEY<&CPU::Immediate>, "DEY", IMM, 1, 2};
 
     // JMP
     opcodeTable[0x4C] = {&CPU::JMP<&CPU::Absolute>, "JMP", ABS, 3, 3};
@@ -912,6 +924,37 @@ void CPU::CPY()
     (this->*AddrMode)();
     uint8_t operand = Read(address);
     Compare(Y, operand);
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::DEC()
+{
+    (this->*AddrMode)();
+    if (AddrMode == &CPU::AbsoluteX)
+    {
+        Tick();
+    }
+    uint8_t operand = Read(address);
+    Write(address, operand);
+    operand--;
+    UpdateZN(operand);
+    Write(address, operand);
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::DEX()
+{
+    Tick();
+    X--;
+    UpdateZN(X);
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::DEY()
+{
+    Tick();
+    Y--;
+    UpdateZN(Y);
 }
 
 template <CPU::AddressModePtr AddrMode>

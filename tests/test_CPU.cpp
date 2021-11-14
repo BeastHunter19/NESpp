@@ -569,6 +569,56 @@ TEST_CASE("CPU executes all instructions correctly")
         }
     }
 
+    SUBCASE("DEC")
+    {
+        SUBCASE("ZeroPage")
+        {
+            // LDA #$01 ; STA $EF ; DEC $EF ; LDA $EF
+            uint8_t instructions[]{0xA9, 0x01, 0x85, 0xEF, 0xC6, 0xEF, 0xA5, 0xEF};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 8);
+            CHECK(state.cycleCount == 13);
+            CHECK(state.PC == 0x0700 + 8);
+            CHECK(state.A == 0x00);
+            CHECK(state.PS.Test<CPU::Z>() == 1);
+            CHECK(state.PS.Test<CPU::N>() == 0);
+        }
+        SUBCASE("AbsoluteX")
+        {
+            // LDA #$00 ; LDX #$04 ; STA $03E4 ; DEC $03E0,x ; LDA $03E4
+            uint8_t instructions[]{0xA9, 0x00, 0xA2, 0x04, 0x8D, 0xE4, 0x03, 0xDE, 0xE0, 0x03, 0xAD, 0xE4, 0x03};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 13);
+            CHECK(state.cycleCount == 19);
+            CHECK(state.PC == 0x0700 + 13);
+            CHECK(state.A == 0xFF);
+            CHECK(state.PS.Test<CPU::Z>() == 0);
+            CHECK(state.PS.Test<CPU::N>() == 1);
+        }
+    }
+
+    SUBCASE("DEX")
+    {
+        // LDX #$01 ; DEX
+        uint8_t instructions[]{0xA2, 0x01, 0xCA};
+        Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 3);
+        CHECK(state.cycleCount == 4);
+        CHECK(state.PC == 0x0700 + 3);
+        CHECK(state.X == 0x00);
+        CHECK(state.PS.Test<CPU::Z>() == 1);
+        CHECK(state.PS.Test<CPU::N>() == 0);
+    }
+
+    SUBCASE("DEY")
+    {
+        // LDY #$F0 ; DEY
+        uint8_t instructions[]{0xA0, 0xF0, 0x88};
+        Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 3);
+        CHECK(state.cycleCount == 4);
+        CHECK(state.PC == 0x0700 + 3);
+        CHECK(state.Y == 0xEF);
+        CHECK(state.PS.Test<CPU::Z>() == 0);
+        CHECK(state.PS.Test<CPU::N>() == 1);
+    }
+
     SUBCASE("JMP")
     {
         SUBCASE("Absolute")
