@@ -710,7 +710,7 @@ TEST_CASE("CPU executes all instructions correctly")
     {
         SUBCASE("Absolute")
         {
-            // JMP $03EF
+            // JMP $07EF
             uint8_t instructions[]{0x4C, 0xEF, 0x07};
             Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 3);
             CHECK(state.cycleCount == 3);
@@ -734,6 +734,16 @@ TEST_CASE("CPU executes all instructions correctly")
             CHECK(state.cycleCount == 17);
             CHECK(state.PC == 0x07EF);
         }
+    }
+
+    SUBCASE("JSR")
+    {
+        // JSR $07EF
+        uint8_t instructions[]{0x20, 0xEF, 0x07};
+        Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 3);
+        CHECK(state.cycleCount == 6);
+        CHECK(state.PC == 0x07EF);
+        CHECK(state.SP == 0xFB);
     }
 
     SUBCASE("LDA")
@@ -844,6 +854,71 @@ TEST_CASE("CPU executes all instructions correctly")
             CHECK(state.Y == 0x80);
             CHECK(state.PS.Test<CPU::Z>() == 0);
             CHECK(state.PS.Test<CPU::N>() == 1);
+        }
+    }
+
+    SUBCASE("LSR")
+    {
+        SUBCASE("Accumulator")
+        {
+            // LDA #$B6 ; LSR
+            uint8_t instructions[]{0xA9, 0xB6, 0x4A};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 3);
+            CHECK(state.A == 0x5B);
+            CHECK(state.cycleCount == 4);
+            CHECK(state.PC == 0x0700 + 3);
+            CHECK(state.PS.Test<CPU::N>() == 0);
+            CHECK(state.PS.Test<CPU::Z>() == 0);
+            CHECK(state.PS.Test<CPU::C>() == 0);
+        }
+        SUBCASE("ZeroPage")
+        {
+            // LDA #$63 ; STA $EF ; LSR $EF ; LDX $EF
+            uint8_t instructions[]{0xA9, 0x63, 0x85, 0xEF, 0x46, 0xEF, 0xA6, 0xEF};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 8);
+            CHECK(state.X == 0x31);
+            CHECK(state.cycleCount == 13);
+            CHECK(state.PC == 0x0700 + 8);
+            CHECK(state.PS.Test<CPU::N>() == 0);
+            CHECK(state.PS.Test<CPU::Z>() == 0);
+            CHECK(state.PS.Test<CPU::C>() == 1);
+        }
+    }
+
+    SUBCASE("ORA")
+    {
+        SUBCASE("Result is zero")
+        {
+            // LDA #$00 ; ORA #$00
+            uint8_t instructions[]{0xA9, 0x00, 0x09, 0x00};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 4);
+            CHECK(state.A == 0x00);
+            CHECK(state.cycleCount == 4);
+            CHECK(state.PC == 0x0700 + 4);
+            CHECK(state.PS.Test<CPU::N>() == 0);
+            CHECK(state.PS.Test<CPU::Z>() == 1);
+        }
+        SUBCASE("Result is positive")
+        {
+            // LDA #$32 ; ORA #$4A
+            uint8_t instructions[]{0xA9, 0x32, 0x09, 0x4A};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 4);
+            CHECK(state.A == 0x7A);
+            CHECK(state.cycleCount == 4);
+            CHECK(state.PC == 0x0700 + 4);
+            CHECK(state.PS.Test<CPU::N>() == 0);
+            CHECK(state.PS.Test<CPU::Z>() == 0);
+        }
+        SUBCASE("Result is negative")
+        {
+            // LDA #$32 ; ORA #$E5
+            uint8_t instructions[]{0xA9, 0x32, 0x09, 0xE5};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 4);
+            CHECK(state.A == 0xF7);
+            CHECK(state.cycleCount == 4);
+            CHECK(state.PC == 0x0700 + 4);
+            CHECK(state.PS.Test<CPU::N>() == 1);
+            CHECK(state.PS.Test<CPU::Z>() == 0);
         }
     }
 

@@ -415,6 +415,9 @@ CPU::CPU(NES& mainBus)
     opcodeTable[0x4C] = {&CPU::JMP<&CPU::Absolute>, "JMP", ABS, 3, 3};
     opcodeTable[0x6C] = {&CPU::JMP<&CPU::Indirect>, "JMP", IND, 3, 5};
 
+    // JSR
+    opcodeTable[0x20] = {&CPU::JSR<&CPU::Absolute>, "JSR", ABS, 3, 6};
+
     // LDA
     opcodeTable[0xA9] = {&CPU::LDA<&CPU::Immediate>, "LDA", IMM, 2, 2};
     opcodeTable[0xA5] = {&CPU::LDA<&CPU::ZeroPage>, "LDA", ZP, 2, 3};
@@ -439,8 +442,25 @@ CPU::CPU(NES& mainBus)
     opcodeTable[0xAC] = {&CPU::LDY<&CPU::Absolute>, "LDY", ABS, 3, 4};
     opcodeTable[0xBC] = {&CPU::LDY<&CPU::AbsoluteX>, "LDY", ABSX, 3, 4, true};
 
+    // LSR
+    opcodeTable[0x4A] = {&CPU::LSR<&CPU::Accumulator>, "LSR", ACC, 1, 2};
+    opcodeTable[0x46] = {&CPU::LSR<&CPU::ZeroPage>, "LSR", ZP, 2, 5};
+    opcodeTable[0x56] = {&CPU::LSR<&CPU::ZeroPageX>, "LSR", ZPX, 2, 6};
+    opcodeTable[0x4E] = {&CPU::LSR<&CPU::Absolute>, "LSR", ABS, 3, 6};
+    opcodeTable[0x5E] = {&CPU::LSR<&CPU::AbsoluteX>, "LSR", ABSX, 3, 7};
+
     // NOP
     opcodeTable[0xEA] = {&CPU::NOP<&CPU::Implied>, "NOP", IMP, 1, 2};
+
+    // ORA
+    opcodeTable[0x09] = {&CPU::ORA<&CPU::Immediate>, "ORA", IMM, 2, 2};
+    opcodeTable[0x05] = {&CPU::ORA<&CPU::ZeroPage>, "ORA", ZP, 2, 3};
+    opcodeTable[0x15] = {&CPU::ORA<&CPU::ZeroPageX>, "ORA", ZPX, 2, 4};
+    opcodeTable[0x0D] = {&CPU::ORA<&CPU::Absolute>, "ORA", ABS, 3, 4};
+    opcodeTable[0x1D] = {&CPU::ORA<&CPU::AbsoluteX>, "ORA", ABSX, 3, 4, true};
+    opcodeTable[0x19] = {&CPU::ORA<&CPU::AbsoluteY>, "ORA", ABSY, 3, 4, true};
+    opcodeTable[0x01] = {&CPU::ORA<&CPU::IndexedIndirect>, "ORA", INDX, 2, 6};
+    opcodeTable[0x11] = {&CPU::ORA<&CPU::IndirectIndexed>, "ORA", INDY, 2, 5, true};
 
     // SEC
     opcodeTable[0x38] = {&CPU::SEC<&CPU::Implied>, "SEC", IMP, 1, 2};
@@ -1030,6 +1050,22 @@ void CPU::JMP()
 }
 
 template <CPU::AddressModePtr AddrMode>
+void CPU::JSR()
+{
+    // this shoul use absolute addressing, but it's
+    // actually a bit different
+    uint8_t addressLow = Read(PC++);
+    Tick();
+    uint8_t PCH = (PC & 0xFF00) >> 8;
+    uint8_t PCL = PC & 0x00FF;
+    PushStack(PCH);
+    PushStack(PCL);
+    PCL = addressLow;
+    PCH = Read(PC);
+    PC = ((uint16_t)PCH << 8) | PCL;
+}
+
+template <CPU::AddressModePtr AddrMode>
 void CPU::LDA()
 {
     if ((this->*AddrMode)() == 1)
@@ -1066,9 +1102,45 @@ void CPU::LDY()
 }
 
 template <CPU::AddressModePtr AddrMode>
+void CPU::LSR()
+{
+    if (AddrMode == &CPU::Accumulator)
+    {
+        Tick();
+        uint8_t accBit0 = A & 0x01;
+        PS.Assign<C>(accBit0);
+        A = A >> 1;
+        UpdateZN(A);
+    }
+    else
+    {
+        (this->*AddrMode)();
+        uint8_t operand = Read(address);
+        Write(address, operand);
+        uint8_t memBit0 = operand & 0x01;
+        PS.Assign<C>(memBit0);
+        operand = operand >> 1;
+        UpdateZN(operand);
+        Write(address, operand);
+    }
+}
+
+template <CPU::AddressModePtr AddrMode>
 void CPU::NOP()
 {
     Tick();
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::ORA()
+{
+    if ((this->*AddrMode)() == 1)
+    {
+        Tick();
+    }
+    uint8_t operand = Read(address);
+    A |= operand;
+    UpdateZN(A);
 }
 
 template <CPU::AddressModePtr AddrMode>
