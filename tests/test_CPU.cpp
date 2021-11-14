@@ -966,6 +966,62 @@ TEST_CASE("CPU executes all instructions correctly")
         CHECK(state.PS.Test<CPU::C>() == 1);
     }
 
+    SUBCASE("ROL")
+    {
+        SUBCASE("Accumulator")
+        {
+            // SEC ; LDA #$B6 ; ROL
+            uint8_t instructions[]{0x38, 0xA9, 0xB6, 0x2A};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 4);
+            CHECK(state.A == 0x6D);
+            CHECK(state.cycleCount == 6);
+            CHECK(state.PC == 0x0700 + 4);
+            CHECK(state.PS.Test<CPU::N>() == 0);
+            CHECK(state.PS.Test<CPU::Z>() == 0);
+            CHECK(state.PS.Test<CPU::C>() == 1);
+        }
+        SUBCASE("ZeroPage")
+        {
+            // LDA #$62 ; STA $EF ; ROL $EF ; LDX $EF
+            uint8_t instructions[]{0xA9, 0x62, 0x85, 0xEF, 0x26, 0xEF, 0xA6, 0xEF};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 8);
+            CHECK(state.X == 0xC4);
+            CHECK(state.cycleCount == 13);
+            CHECK(state.PC == 0x0700 + 8);
+            CHECK(state.PS.Test<CPU::N>() == 1);
+            CHECK(state.PS.Test<CPU::Z>() == 0);
+            CHECK(state.PS.Test<CPU::C>() == 0);
+        }
+    }
+
+    SUBCASE("ROR")
+    {
+        SUBCASE("Accumulator")
+        {
+            // SEC ; LDA #$B6 ; ROR
+            uint8_t instructions[]{0x38, 0xA9, 0xB6, 0x6A};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 4);
+            CHECK(state.A == 0xDB);
+            CHECK(state.cycleCount == 6);
+            CHECK(state.PC == 0x0700 + 4);
+            CHECK(state.PS.Test<CPU::N>() == 1);
+            CHECK(state.PS.Test<CPU::Z>() == 0);
+            CHECK(state.PS.Test<CPU::C>() == 0);
+        }
+        SUBCASE("ZeroPage")
+        {
+            // LDA #$63 ; STA $EF ; ROR $EF ; LDX $EF
+            uint8_t instructions[]{0xA9, 0x63, 0x85, 0xEF, 0x66, 0xEF, 0xA6, 0xEF};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 8);
+            CHECK(state.X == 0x31);
+            CHECK(state.cycleCount == 13);
+            CHECK(state.PC == 0x0700 + 8);
+            CHECK(state.PS.Test<CPU::N>() == 0);
+            CHECK(state.PS.Test<CPU::Z>() == 0);
+            CHECK(state.PS.Test<CPU::C>() == 1);
+        }
+    }
+
     SUBCASE("SEC")
     {
         // SEC

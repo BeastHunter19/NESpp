@@ -474,6 +474,20 @@ CPU::CPU(NES& mainBus)
     // PLP
     opcodeTable[0x28] = {&CPU::PLP<&CPU::Implied>, "PLP", IMP, 1, 4};
 
+    // ROL
+    opcodeTable[0x2A] = {&CPU::ROL<&CPU::Accumulator>, "ROL", ACC, 1, 2};
+    opcodeTable[0x26] = {&CPU::ROL<&CPU::ZeroPage>, "ROL", ZP, 2, 5};
+    opcodeTable[0x36] = {&CPU::ROL<&CPU::ZeroPageX>, "ROL", ZPX, 2, 6};
+    opcodeTable[0x2E] = {&CPU::ROL<&CPU::Absolute>, "ROL", ABS, 3, 6};
+    opcodeTable[0x3E] = {&CPU::ROL<&CPU::AbsoluteX>, "ROL", ABSX, 3, 7};
+
+    // ROR
+    opcodeTable[0x6A] = {&CPU::ROR<&CPU::Accumulator>, "ROR", ACC, 1, 2};
+    opcodeTable[0x66] = {&CPU::ROR<&CPU::ZeroPage>, "ROR", ZP, 2, 5};
+    opcodeTable[0x76] = {&CPU::ROR<&CPU::ZeroPageX>, "ROR", ZPX, 2, 6};
+    opcodeTable[0x6E] = {&CPU::ROR<&CPU::Absolute>, "ROR", ABS, 3, 6};
+    opcodeTable[0x7E] = {&CPU::ROR<&CPU::AbsoluteX>, "ROR", ABSX, 3, 7};
+
     // SEC
     opcodeTable[0x38] = {&CPU::SEC<&CPU::Implied>, "SEC", IMP, 1, 2};
 
@@ -1184,6 +1198,58 @@ void CPU::PLP()
     Tick();
     Tick();
     PS.value = PullStack();
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::ROL()
+{
+    if (AddrMode == &CPU::Accumulator)
+    {
+        Tick();
+        uint8_t accBit7 = (A & 0x80) >> 7;
+        A = A << 1;
+        A |= PS.Test<C>();
+        PS.Assign<C>(accBit7);
+        UpdateZN(A);
+    }
+    else
+    {
+        (this->*AddrMode)();
+        uint8_t operand = Read(address);
+        Write(address, operand);
+        uint8_t memBit7 = (operand & 0x80) >> 7;
+        operand = operand << 1;
+        operand |= PS.Test<C>();
+        PS.Assign<C>(memBit7);
+        UpdateZN(operand);
+        Write(address, operand);
+    }
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::ROR()
+{
+    if (AddrMode == &CPU::Accumulator)
+    {
+        Tick();
+        uint8_t accBit0 = A & 0x01;
+        A = A >> 1;
+        A |= (PS.Test<C>() << 7);
+        PS.Assign<C>(accBit0);
+        UpdateZN(A);
+    }
+    else
+    {
+        (this->*AddrMode)();
+        uint8_t operand = Read(address);
+        Write(address, operand);
+        uint8_t memBit0 = operand & 0x01;
+        operand = operand >> 1;
+        operand |= (PS.Test<C>() << 7);
+        PS.Assign<C>(memBit0);
+        UpdateZN(operand);
+        Write(address, operand);
+    }
 }
 
 template <CPU::AddressModePtr AddrMode>
