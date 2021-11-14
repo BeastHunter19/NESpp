@@ -86,7 +86,7 @@ TEST_CASE("CPU executes all instructions correctly")
     {
         SUBCASE("Result is zero")
         {
-            // LDA #$32 ; AND #$E5
+            // LDA #$32 ; AND #$00
             uint8_t instructions[]{0xA9, 0x32, 0x29, 0x00};
             Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 4);
             CHECK(state.A == 0x00);
@@ -108,7 +108,7 @@ TEST_CASE("CPU executes all instructions correctly")
         }
         SUBCASE("Result is negative")
         {
-            // LDA #$32 ; AND #$E5
+            // LDA #$82 ; AND #$E5
             uint8_t instructions[]{0xA9, 0x82, 0x29, 0xE5};
             Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 4);
             CHECK(state.A == 0x80);
@@ -615,6 +615,93 @@ TEST_CASE("CPU executes all instructions correctly")
         CHECK(state.cycleCount == 4);
         CHECK(state.PC == 0x0700 + 3);
         CHECK(state.Y == 0xEF);
+        CHECK(state.PS.Test<CPU::Z>() == 0);
+        CHECK(state.PS.Test<CPU::N>() == 1);
+    }
+
+    SUBCASE("EOR")
+    {
+        SUBCASE("Result is zero")
+        {
+            // LDA #$32 ; EOR #$32
+            uint8_t instructions[]{0xA9, 0x32, 0x49, 0x32};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 4);
+            CHECK(state.A == 0x00);
+            CHECK(state.cycleCount == 4);
+            CHECK(state.PC == 0x0700 + 4);
+            CHECK(state.PS.Test<CPU::N>() == 0);
+            CHECK(state.PS.Test<CPU::Z>() == 1);
+        }
+        SUBCASE("Result is positive")
+        {
+            // LDA #$32 ; EOR #$4A
+            uint8_t instructions[]{0xA9, 0x32, 0x49, 0x4A};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 4);
+            CHECK(state.A == 0x78);
+            CHECK(state.cycleCount == 4);
+            CHECK(state.PC == 0x0700 + 4);
+            CHECK(state.PS.Test<CPU::N>() == 0);
+            CHECK(state.PS.Test<CPU::Z>() == 0);
+        }
+        SUBCASE("Result is negative")
+        {
+            // LDA #$32 ; EOR #$E5
+            uint8_t instructions[]{0xA9, 0x32, 0x49, 0xE5};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 4);
+            CHECK(state.A == 0xD7);
+            CHECK(state.cycleCount == 4);
+            CHECK(state.PC == 0x0700 + 4);
+            CHECK(state.PS.Test<CPU::N>() == 1);
+            CHECK(state.PS.Test<CPU::Z>() == 0);
+        }
+    }
+
+    SUBCASE("INC")
+    {
+        SUBCASE("ZeroPage")
+        {
+            // LDA #$FF ; STA $EF ; INC $EF ; LDA $EF
+            uint8_t instructions[]{0xA9, 0xFF, 0x85, 0xEF, 0xE6, 0xEF, 0xA5, 0xEF};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 8);
+            CHECK(state.cycleCount == 13);
+            CHECK(state.PC == 0x0700 + 8);
+            CHECK(state.A == 0x00);
+            CHECK(state.PS.Test<CPU::Z>() == 1);
+            CHECK(state.PS.Test<CPU::N>() == 0);
+        }
+        SUBCASE("AbsoluteX")
+        {
+            // LDA #$7F ; LDX #$04 ; STA $03E4 ; INC $03E0,x ; LDA $03E4
+            uint8_t instructions[]{0xA9, 0x7F, 0xA2, 0x04, 0x8D, 0xE4, 0x03, 0xFE, 0xE0, 0x03, 0xAD, 0xE4, 0x03};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 13);
+            CHECK(state.cycleCount == 19);
+            CHECK(state.PC == 0x0700 + 13);
+            CHECK(state.A == 0x80);
+            CHECK(state.PS.Test<CPU::Z>() == 0);
+            CHECK(state.PS.Test<CPU::N>() == 1);
+        }
+    }
+
+    SUBCASE("INX")
+    {
+        // LDX #$FF ; INX
+        uint8_t instructions[]{0xA2, 0xFF, 0xE8};
+        Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 3);
+        CHECK(state.cycleCount == 4);
+        CHECK(state.PC == 0x0700 + 3);
+        CHECK(state.X == 0x00);
+        CHECK(state.PS.Test<CPU::Z>() == 1);
+        CHECK(state.PS.Test<CPU::N>() == 0);
+    }
+
+    SUBCASE("INY")
+    {
+        // LDY #$F0 ; INY
+        uint8_t instructions[]{0xA0, 0xF0, 0xC8};
+        Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 3);
+        CHECK(state.cycleCount == 4);
+        CHECK(state.PC == 0x0700 + 3);
+        CHECK(state.Y == 0xF1);
         CHECK(state.PS.Test<CPU::Z>() == 0);
         CHECK(state.PS.Test<CPU::N>() == 1);
     }

@@ -389,6 +389,28 @@ CPU::CPU(NES& mainBus)
     // DEY
     opcodeTable[0x88] = {&CPU::DEY<&CPU::Immediate>, "DEY", IMM, 1, 2};
 
+    // EOR
+    opcodeTable[0x49] = {&CPU::EOR<&CPU::Immediate>, "EOR", IMM, 2, 2};
+    opcodeTable[0x45] = {&CPU::EOR<&CPU::ZeroPage>, "EOR", ZP, 2, 3};
+    opcodeTable[0x55] = {&CPU::EOR<&CPU::ZeroPageX>, "EOR", ZPX, 2, 4};
+    opcodeTable[0x4D] = {&CPU::EOR<&CPU::Absolute>, "EOR", ABS, 3, 4};
+    opcodeTable[0x5D] = {&CPU::EOR<&CPU::AbsoluteX>, "EOR", ABSX, 3, 4, true};
+    opcodeTable[0x59] = {&CPU::EOR<&CPU::AbsoluteY>, "EOR", ABSY, 3, 4, true};
+    opcodeTable[0x41] = {&CPU::EOR<&CPU::IndexedIndirect>, "EOR", INDX, 2, 6};
+    opcodeTable[0x51] = {&CPU::EOR<&CPU::IndirectIndexed>, "EOR", INDY, 2, 5, true};
+
+    // INC
+    opcodeTable[0xE6] = {&CPU::INC<&CPU::ZeroPage>, "INC", ZP, 2, 5};
+    opcodeTable[0xF6] = {&CPU::INC<&CPU::ZeroPageX>, "INC", ZPX, 2, 6};
+    opcodeTable[0xEE] = {&CPU::INC<&CPU::Absolute>, "INC", ABS, 3, 6};
+    opcodeTable[0xFE] = {&CPU::INC<&CPU::AbsoluteX>, "INC", ABSX, 3, 7};
+
+    // INX
+    opcodeTable[0xE8] = {&CPU::INX<&CPU::Immediate>, "INX", IMM, 1, 2};
+
+    // INY
+    opcodeTable[0xC8] = {&CPU::INY<&CPU::Immediate>, "INY", IMM, 1, 2};
+
     // JMP
     opcodeTable[0x4C] = {&CPU::JMP<&CPU::Absolute>, "JMP", ABS, 3, 3};
     opcodeTable[0x6C] = {&CPU::JMP<&CPU::Indirect>, "JMP", IND, 3, 5};
@@ -954,6 +976,49 @@ void CPU::DEY()
 {
     Tick();
     Y--;
+    UpdateZN(Y);
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::EOR()
+{
+    if ((this->*AddrMode)() == 1)
+    {
+        Tick();
+    }
+    uint8_t operand = Read(address);
+    A ^= operand;
+    UpdateZN(A);
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::INC()
+{
+    (this->*AddrMode)();
+    if (AddrMode == &CPU::AbsoluteX)
+    {
+        Tick();
+    }
+    uint8_t operand = Read(address);
+    Write(address, operand);
+    operand++;
+    UpdateZN(operand);
+    Write(address, operand);
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::INX()
+{
+    Tick();
+    X++;
+    UpdateZN(X);
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::INY()
+{
+    Tick();
+    Y++;
     UpdateZN(Y);
 }
 
