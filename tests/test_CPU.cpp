@@ -922,6 +922,50 @@ TEST_CASE("CPU executes all instructions correctly")
         }
     }
 
+    SUBCASE("PHA")
+    {
+        // LDA #$3A ; PHA ; LDX $01FD
+        uint8_t instructions[]{0xA9, 0x3A, 0x48, 0xAE, 0xFD, 0x01};
+        Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 6);
+        CHECK(state.X == 0x3A);
+        CHECK(state.cycleCount == 9);
+        CHECK(state.PC == 0x0700 + 6);
+    }
+
+    SUBCASE("PHP")
+    {
+        // PHP ; LDX $01FD
+        uint8_t instructions[]{0x08, 0xAE, 0xFD, 0x01};
+        Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 4);
+        CHECK(state.X == 0x34);
+        CHECK(state.cycleCount == 7);
+        CHECK(state.PC == 0x0700 + 4);
+    }
+
+    SUBCASE("PLA")
+    {
+        // LDA #$8A ; PHA ; LDA #$1F ; PLA
+        uint8_t instructions[]{0xA9, 0x8A, 0x48, 0xA9, 0x1F, 0x68};
+        Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 6);
+        CHECK(state.A == 0x8A);
+        CHECK(state.cycleCount == 11);
+        CHECK(state.PC == 0x0700 + 6);
+        CHECK(state.PS.Test<CPU::Z>() == 0);
+        CHECK(state.PS.Test<CPU::N>() == 1);
+    }
+
+    SUBCASE("PLP")
+    {
+        // LDA #$8A ; SEC ; PHP ; LDA #$1F ; CLC ; PLP
+        uint8_t instructions[]{0xA9, 0x8A, 0x38, 0x08, 0xA9, 0x1F, 0x18, 0x28};
+        Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 8);
+        CHECK(state.cycleCount == 15);
+        CHECK(state.PC == 0x0700 + 8);
+        CHECK(state.PS.Test<CPU::Z>() == 0);
+        CHECK(state.PS.Test<CPU::N>() == 1);
+        CHECK(state.PS.Test<CPU::C>() == 1);
+    }
+
     SUBCASE("SEC")
     {
         // SEC

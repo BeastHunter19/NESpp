@@ -124,7 +124,7 @@ private:
 
     // Access stack (locations 0x0100-0x01FF)
     inline void PushStack(uint8_t value);
-    inline uint8_t PopStack();
+    inline uint8_t PullStack();
 
     // Compares the values setting flags accordingly
     inline void Compare(uint8_t reg, uint8_t operand);

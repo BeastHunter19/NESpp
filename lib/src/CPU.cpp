@@ -462,6 +462,18 @@ CPU::CPU(NES& mainBus)
     opcodeTable[0x01] = {&CPU::ORA<&CPU::IndexedIndirect>, "ORA", INDX, 2, 6};
     opcodeTable[0x11] = {&CPU::ORA<&CPU::IndirectIndexed>, "ORA", INDY, 2, 5, true};
 
+    // PHA
+    opcodeTable[0x48] = {&CPU::PHA<&CPU::Implied>, "PHA", IMP, 1, 3};
+
+    // PHP
+    opcodeTable[0x08] = {&CPU::PHP<&CPU::Implied>, "PHP", IMP, 1, 3};
+
+    // PLA
+    opcodeTable[0x68] = {&CPU::PLA<&CPU::Implied>, "PLA", IMP, 1, 4};
+
+    // PLP
+    opcodeTable[0x28] = {&CPU::PLP<&CPU::Implied>, "PLP", IMP, 1, 4};
+
     // SEC
     opcodeTable[0x38] = {&CPU::SEC<&CPU::Implied>, "SEC", IMP, 1, 2};
 
@@ -581,7 +593,7 @@ void CPU::PushStack(uint8_t value)
     SP--;
 }
 
-uint8_t CPU::PopStack()
+uint8_t CPU::PullStack()
 {
     SP++;
     return Read(0x0100 + SP);
@@ -1141,6 +1153,37 @@ void CPU::ORA()
     uint8_t operand = Read(address);
     A |= operand;
     UpdateZN(A);
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::PHA()
+{
+    Tick();
+    PushStack(A);
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::PHP()
+{
+    Tick();
+    PushStack(PS.value);
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::PLA()
+{
+    Tick();
+    Tick();
+    A = PullStack();
+    UpdateZN(A);
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::PLP()
+{
+    Tick();
+    Tick();
+    PS.value = PullStack();
 }
 
 template <CPU::AddressModePtr AddrMode>
