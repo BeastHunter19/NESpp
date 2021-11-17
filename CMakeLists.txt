@@ -10,6 +10,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+set_property(GLOBAL PROPERTY CTEST_TARGETS_ADDED 1)
 include(CTest)
 
 add_subdirectory(external)
