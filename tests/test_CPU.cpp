@@ -1022,6 +1022,26 @@ TEST_CASE("CPU executes all instructions correctly")
         }
     }
 
+    SUBCASE("RTI")
+    {
+        // LDA #$03 ; PHA ; LDA #$FF ; PHA ; PHP ; RTI
+        uint8_t instructions[]{0xA9, 0x03, 0x48, 0xA9, 0xFF, 0x48, 0x08, 0x40};
+        Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 8);
+        CHECK(state.cycleCount == 19);
+        CHECK(state.PC == 0x03FF);
+        CHECK(state.PS.Test<CPU::N>() == 1);
+        CHECK(state.PS.Test<CPU::Z>() == 0);
+    }
+
+    SUBCASE("RTS")
+    {
+        // LDA #$03 ; PHA ; LDA #$FF ; PHA ; RTS
+        uint8_t instructions[]{0xA9, 0x03, 0x48, 0xA9, 0xFF, 0x48, 0x60};
+        Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 7);
+        CHECK(state.cycleCount == 16);
+        CHECK(state.PC == 0x0400);
+    }
+
     SUBCASE("SEC")
     {
         // SEC
