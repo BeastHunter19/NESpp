@@ -1142,7 +1142,7 @@ TEST_CASE("CPU executes all instructions correctly")
             CHECK(state.PC == 0x0700 + 6);
             CHECK(state.X == 0xEF);
         }
-        SUBCASE("ZeroPageX (Y)")
+        SUBCASE("ZeroPageX")
         {
             // LDX #$03 ; LDA #$EF ; STA $FE,x ; LDX $01
             uint8_t instructions[]{0xA2, 0x03, 0xA9, 0xEF, 0x95, 0xFE, 0xA6, 0x01};
@@ -1197,6 +1197,68 @@ TEST_CASE("CPU executes all instructions correctly")
             CHECK(state.cycleCount == 24);
             CHECK(state.PC == 0x0700 + 17);
             CHECK(state.X == 0xEF);
+        }
+    }
+
+    SUBCASE("STX")
+    {
+        SUBCASE("ZeroPage")
+        {
+            // LDX #$EF ; STX $1F ; LDA $1F
+            uint8_t instructions[]{0xA2, 0xEF, 0x86, 0x1F, 0xA5, 0x1F};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 6);
+            CHECK(state.cycleCount == 8);
+            CHECK(state.PC == 0x0700 + 6);
+            CHECK(state.A == 0xEF);
+        }
+        SUBCASE("ZeroPageY")
+        {
+            // LDY #$03 ; LDX #$EF ; STX $FE,y ; LDA $01
+            uint8_t instructions[]{0xA0, 0x03, 0xA2, 0xEF, 0x96, 0xFE, 0xA5, 0x01};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 8);
+            CHECK(state.cycleCount == 11);
+            CHECK(state.PC == 0x0700 + 8);
+            CHECK(state.A == 0xEF);
+        }
+        SUBCASE("Absolute")
+        {
+            // LDX #$EF ; STX $0200 ; LDA $0200
+            uint8_t instructions[]{0xA2, 0xEF, 0x8E, 0x00, 0x02, 0xAD, 0x00, 0x02};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 8);
+            CHECK(state.cycleCount == 10);
+            CHECK(state.PC == 0x0700 + 8);
+            CHECK(state.A == 0xEF);
+        }
+    }
+
+    SUBCASE("STY")
+    {
+        SUBCASE("ZeroPage")
+        {
+            // LDY #$EF ; STY $1F ; LDA $1F
+            uint8_t instructions[]{0xA0, 0xEF, 0x84, 0x1F, 0xA5, 0x1F};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 6);
+            CHECK(state.cycleCount == 8);
+            CHECK(state.PC == 0x0700 + 6);
+            CHECK(state.A == 0xEF);
+        }
+        SUBCASE("ZeroPageX")
+        {
+            // LDX #$03 ; LDY #$EF ; STY $FE,x ; LDA $01
+            uint8_t instructions[]{0xA2, 0x03, 0xA0, 0xEF, 0x94, 0xFE, 0xA5, 0x01};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 8);
+            CHECK(state.cycleCount == 11);
+            CHECK(state.PC == 0x0700 + 8);
+            CHECK(state.A == 0xEF);
+        }
+        SUBCASE("Absolute")
+        {
+            // LDY #$EF ; STY $0200 ; LDA $0200
+            uint8_t instructions[]{0xA0, 0xEF, 0x8C, 0x00, 0x02, 0xAD, 0x00, 0x02};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 8);
+            CHECK(state.cycleCount == 10);
+            CHECK(state.PC == 0x0700 + 8);
+            CHECK(state.A == 0xEF);
         }
     }
 }

@@ -261,6 +261,16 @@ CPU::CPU(NES& mainBus)
     opcodeTable[0x99] = {&CPU::STA<&CPU::AbsoluteY>, "STA", ABSY, 3, 5};
     opcodeTable[0x81] = {&CPU::STA<&CPU::IndexedIndirect>, "STA", INDX, 2, 6};
     opcodeTable[0x91] = {&CPU::STA<&CPU::IndirectIndexed>, "STA", INDY, 2, 6};
+
+    // STX
+    opcodeTable[0x86] = {&CPU::STX<&CPU::ZeroPage>, "STX", ZP, 2, 3};
+    opcodeTable[0x96] = {&CPU::STX<&CPU::ZeroPageY>, "STX", ZPY, 2, 4};
+    opcodeTable[0x8E] = {&CPU::STX<&CPU::Absolute>, "STX", ABS, 3, 4};
+
+    // STY
+    opcodeTable[0x84] = {&CPU::STY<&CPU::ZeroPage>, "STY", ZP, 2, 3};
+    opcodeTable[0x94] = {&CPU::STY<&CPU::ZeroPageX>, "STY", ZPX, 2, 4};
+    opcodeTable[0x8C] = {&CPU::STY<&CPU::Absolute>, "STY", ABS, 3, 4};
 }
 
 void CPU::ExecuteInstrFromRAM(uint16_t startingLocation, size_t number)
@@ -1112,6 +1122,20 @@ void CPU::STA()
         Tick();
     }
     Write(address, A);
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::STX()
+{
+    (this->*AddrMode)();
+    Write(address, X);
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::STY()
+{
+    (this->*AddrMode)();
+    Write(address, Y);
 }
 
 
