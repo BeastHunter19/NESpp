@@ -1042,6 +1042,65 @@ TEST_CASE("CPU executes all instructions correctly")
         CHECK(state.PC == 0x0400);
     }
 
+    SUBCASE("SBC")
+    {
+        SUBCASE("Subtract to empty accumulator")
+        {
+            // SEC ; SBC #$30
+            uint8_t instructions[]{0x38, 0xE9, 0x30};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 3);
+            CHECK(state.A == 0xD0);
+            CHECK(state.cycleCount == 4);
+            CHECK(state.PC == 0x0700 + 3);
+            CHECK(state.PS.Test<CPU::C>() == 0);
+            CHECK(state.PS.Test<CPU::V>() == 0);
+        }
+        SUBCASE("Subtract with carry unset")
+        {
+            // LDA #$11 ; SBC #$1F
+            uint8_t instructions[]{0xA9, 0x11, 0xE9, 0x1F};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 4);
+            CHECK(state.A == 0xF1);
+            CHECK(state.cycleCount == 4);
+            CHECK(state.PC == 0x0700 + 4);
+            CHECK(state.PS.Test<CPU::C>() == 0);
+            CHECK(state.PS.Test<CPU::V>() == 0);
+        }
+        SUBCASE("Subtract with carry set")
+        {
+            // SEC ; LDA #$11 ; SBC #$1F
+            uint8_t instructions[]{0x38, 0xA9, 0x11, 0xE9, 0x1F};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 5);
+            CHECK(state.A == 0xF2);
+            CHECK(state.cycleCount == 6);
+            CHECK(state.PC == 0x0700 + 5);
+            CHECK(state.PS.Test<CPU::C>() == 0);
+            CHECK(state.PS.Test<CPU::V>() == 0);
+        }
+        SUBCASE("Subtract triggers carry")
+        {
+            // SEC ; LDA #$FE ; SBC #$05
+            uint8_t instructions[]{0x38, 0xA9, 0xFE, 0xE9, 0x05};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 5);
+            CHECK(state.A == 0xF9);
+            CHECK(state.cycleCount == 6);
+            CHECK(state.PC == 0x0700 + 5);
+            CHECK(state.PS.Test<CPU::C>() == 1);
+            CHECK(state.PS.Test<CPU::V>() == 0);
+        }
+        SUBCASE("Subtract triggers overflow")
+        {
+            // SEC ; LDA #$7F ; SBC #$FF
+            uint8_t instructions[]{0x38, 0xA9, 0x7F, 0xE9, 0xFF};
+            Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 5);
+            CHECK(state.A == 0x80);
+            CHECK(state.cycleCount == 6);
+            CHECK(state.PC == 0x0700 + 5);
+            CHECK(state.PS.Test<CPU::C>() == 0);
+            CHECK(state.PS.Test<CPU::V>() == 1);
+        }
+    }
+
     SUBCASE("SEC")
     {
         // SEC
@@ -1050,6 +1109,26 @@ TEST_CASE("CPU executes all instructions correctly")
         CHECK(state.cycleCount == 2);
         CHECK(state.PC == 0x0700 + 1);
         CHECK(state.PS.Test<CPU::C>() == 1);
+    }
+
+    SUBCASE("SED")
+    {
+        // SED
+        uint8_t instructions[]{0xF8};
+        Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 1);
+        CHECK(state.cycleCount == 2);
+        CHECK(state.PC == 0x0700 + 1);
+        CHECK(state.PS.Test<CPU::D>() == 1);
+    }
+
+    SUBCASE("SEI")
+    {
+        // SEI
+        uint8_t instructions[]{0x78};
+        Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 1);
+        CHECK(state.cycleCount == 2);
+        CHECK(state.PC == 0x0700 + 1);
+        CHECK(state.PS.Test<CPU::I>() == 1);
     }
 
     SUBCASE("STA")

@@ -234,8 +234,24 @@ CPU::CPU(NES& mainBus)
     // RTS
     opcodeTable[0x60] = {&CPU::RTS<&CPU::Implied>, "RTS", IMP, 1, 6};
 
+    // SBC
+    opcodeTable[0xE9] = {&CPU::SBC<&CPU::Immediate>, "SBC", IMM, 2, 2};
+    opcodeTable[0xE5] = {&CPU::SBC<&CPU::ZeroPage>, "SBC", ZP, 2, 3};
+    opcodeTable[0xF5] = {&CPU::SBC<&CPU::ZeroPageX>, "SBC", ZPX, 2, 4};
+    opcodeTable[0xED] = {&CPU::SBC<&CPU::Absolute>, "SBC", ABS, 3, 4};
+    opcodeTable[0xFD] = {&CPU::SBC<&CPU::AbsoluteX>, "SBC", ABSX, 3, 4, true};
+    opcodeTable[0xF9] = {&CPU::SBC<&CPU::AbsoluteY>, "SBC", ABSY, 3, 4, true};
+    opcodeTable[0xE1] = {&CPU::SBC<&CPU::IndexedIndirect>, "SBC", INDX, 2, 6};
+    opcodeTable[0xF1] = {&CPU::SBC<&CPU::IndirectIndexed>, "SBC", INDY, 2, 5, true};
+
     // SEC
     opcodeTable[0x38] = {&CPU::SEC<&CPU::Implied>, "SEC", IMP, 1, 2};
+
+    // SED
+    opcodeTable[0xF8] = {&CPU::SED<&CPU::Implied>, "SED", IMP, 1, 2};
+
+    // SEI
+    opcodeTable[0x78] = {&CPU::SEI<&CPU::Implied>, "SEI", IMP, 1, 2};
 
     // STA
     opcodeTable[0x85] = {&CPU::STA<&CPU::ZeroPage>, "STA", ZP, 2, 3};
@@ -530,7 +546,10 @@ void CPU::Illegal()
 template <CPU::AddressModePtr AddrMode>
 void CPU::ADC()
 {
-    (this->*AddrMode)();
+    if((this->*AddrMode)() == 1)
+    {
+        Tick();
+    }
     uint8_t operand = Read(address);
     uint8_t carry = PS.Test<C>();
     uint8_t result = A + operand + carry;
@@ -1021,11 +1040,67 @@ void CPU::RTS()
     PC++;
 }
 
+template<CPU::AddressModePtr AddrMode>
+void CPU::SBC()
+{
+    if((this->*AddrMode)() == 1)
+    {
+        Tick();
+    }
+    uint8_t operand = Read(address);
+    uint8_t carry = PS.Test<C>();
+    // operand's sign is changed, as in the actual 6502,
+    // by taking it's two's complement: it is first complemented
+    // and then 1 is added; actually the carry bit is added since
+    // it is always assumed that it should be set to 1 before doing
+    // arithmetic subtractions. If there actually was a borrow in
+    // the previous subtraction the carry bit would be 0 and this
+    // basically means that 1 is subtracted from the final result
+    // (since 0 is added instead of 1 when taking two's complement)
+    operand = ~operand + carry;
+    uint8_t result = A + operand;
+    UpdateZN(result);
+    if (result < A)
+    {
+        PS.Set<C>();
+    }
+    else
+    {
+        PS.Clear<C>();
+    }
+
+    // Overflow is set if the two operands have the same sign
+    // (both 0 or both 1) and the resul have a different one
+    if ((~(A ^ (operand + carry)) & (A ^ result)) & 0x80)
+    {
+        PS.Set<V>();
+    }
+    else
+    {
+        PS.Clear<V>();
+    }
+    A = result;
+}
+
 template <CPU::AddressModePtr AddrMode>
 void CPU::SEC()
 {
     Tick();
     PS.Set<C>();
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::SED()
+{
+    Tick();
+    PS.Set<D>();
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::SEI()
+{
+    Tick();
+    PS.Set<I>();
 }
 
 template <CPU::AddressModePtr AddrMode>
