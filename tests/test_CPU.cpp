@@ -1261,4 +1261,69 @@ TEST_CASE("CPU executes all instructions correctly")
             CHECK(state.A == 0xEF);
         }
     }
+
+    SUBCASE("TAX")
+    {
+        // LDA #$8A ; TAX
+        uint8_t instructions[]{0xA9, 0x8A, 0xAA};
+        Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 3);
+        CHECK(state.cycleCount == 4);
+        CHECK(state.PC == 0x0700 + 3);
+        CHECK(state.X == 0x8A);
+        CHECK(state.PS.Test<CPU::N>() == 1);
+    }
+
+    SUBCASE("TAY")
+    {
+        // LDA #$8A ; TAY
+        uint8_t instructions[]{0xA9, 0x8A, 0xA8};
+        Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 3);
+        CHECK(state.cycleCount == 4);
+        CHECK(state.PC == 0x0700 + 3);
+        CHECK(state.Y == 0x8A);
+        CHECK(state.PS.Test<CPU::N>() == 1);
+    }
+
+    SUBCASE("TSX")
+    {
+        // TSX
+        uint8_t instructions[]{0xBA};
+        Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 1);
+        CHECK(state.cycleCount == 2);
+        CHECK(state.PC == 0x0700 + 1);
+        CHECK(state.X == 0xFD);
+        CHECK(state.PS.Test<CPU::N>() == 1);
+    }
+
+    SUBCASE("TXA")
+    {
+        // LDX #$7A ; TXA
+        uint8_t instructions[]{0xA2, 0x7A, 0x8A};
+        Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 3);
+        CHECK(state.cycleCount == 4);
+        CHECK(state.PC == 0x0700 + 3);
+        CHECK(state.A == 0x7A);
+        CHECK(state.PS.Test<CPU::N>() == 0);
+    }
+
+    SUBCASE("TXS")
+    {
+        // LDX #$7A ; TXS
+        uint8_t instructions[]{0xA2, 0x7A, 0x9A};
+        Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 3);
+        CHECK(state.cycleCount == 4);
+        CHECK(state.PC == 0x0700 + 3);
+        CHECK(state.SP == 0x7A);
+    }
+
+    SUBCASE("TYA")
+    {
+        // LDY #$7A ; TYA
+        uint8_t instructions[]{0xA0, 0x7A, 0x98};
+        Debugger::CpuState state = testDebugger.ExecuteInstrFromArray(instructions, 3);
+        CHECK(state.cycleCount == 4);
+        CHECK(state.PC == 0x0700 + 3);
+        CHECK(state.A == 0x7A);
+        CHECK(state.PS.Test<CPU::N>() == 0);
+    }
 }

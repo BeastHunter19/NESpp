@@ -271,6 +271,24 @@ CPU::CPU(NES& mainBus)
     opcodeTable[0x84] = {&CPU::STY<&CPU::ZeroPage>, "STY", ZP, 2, 3};
     opcodeTable[0x94] = {&CPU::STY<&CPU::ZeroPageX>, "STY", ZPX, 2, 4};
     opcodeTable[0x8C] = {&CPU::STY<&CPU::Absolute>, "STY", ABS, 3, 4};
+
+    // TAX
+    opcodeTable[0xAA] = {&CPU::TAX<&CPU::Implied>, "TAX", IMP, 1, 2};
+
+    // TAY
+    opcodeTable[0xA8] = {&CPU::TAY<&CPU::Implied>, "TAY", IMP, 1, 2};
+
+    // TSX
+    opcodeTable[0xBA] = {&CPU::TSX<&CPU::Implied>, "TSX", IMP, 1, 2};
+
+    // TXA
+    opcodeTable[0x8A] = {&CPU::TXA<&CPU::Implied>, "TXA", IMP, 1, 2};
+
+    // TXS
+    opcodeTable[0x9A] = {&CPU::TXS<&CPU::Implied>, "TXS", IMP, 1, 2};
+
+    // TYA
+    opcodeTable[0x98] = {&CPU::TYA<&CPU::Implied>, "TYA", IMP, 1, 2};
 }
 
 void CPU::ExecuteInstrFromRAM(uint16_t startingLocation, size_t number)
@@ -1138,4 +1156,49 @@ void CPU::STY()
     Write(address, Y);
 }
 
+template <CPU::AddressModePtr AddrMode>
+void CPU::TAX()
+{
+    Tick();
+    X = A;
+    UpdateZN(X);
+}
 
+template <CPU::AddressModePtr AddrMode>
+void CPU::TAY()
+{
+    Tick();
+    Y = A;
+    UpdateZN(Y);
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::TSX()
+{
+    Tick();
+    X = SP;
+    UpdateZN(X);
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::TXA()
+{
+    Tick();
+    A = X;
+    UpdateZN(A);
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::TXS()
+{
+    Tick();
+    SP = X;
+}
+
+template <CPU::AddressModePtr AddrMode>
+void CPU::TYA()
+{
+    Tick();
+    A = Y;
+    UpdateZN(A);
+}
