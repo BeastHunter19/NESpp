@@ -26,7 +26,7 @@ struct BitMappedRegister
     inline void Assign(uint8_t val)
     {
         int leftZeros = std::countr_zero((uint8_t)flagMask);
-        uint8_t actualMask = flagMask & (val << leftZeros);
+        uint8_t actualMask = val << leftZeros;
         value &= (~flagMask);
         value |= actualMask;
     }

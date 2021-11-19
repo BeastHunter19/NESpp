@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
+#include <fstream>
 #include <sys/types.h>
 
 CPU::CPU(NES& mainBus)
@@ -15,6 +16,7 @@ CPU::CPU(NES& mainBus)
     // SP value after reset will be 0xFD
     SP = 0x00;
 
+    /*
     // TODO: should be done by peripherals themselves
     Write(0x4017, 0x00);
     Write(0x4015, 0x00);
@@ -24,8 +26,10 @@ CPU::CPU(NES& mainBus)
         mainBus.Write(address, 0x00);
     }
     // TODO: initialize APU registers
+    */
 
-    Reset();
+    // Fill all opcodes with Illegal dummy instruction to avoid crashes
+    opcodeTable.fill({&CPU::Illegal, "Illegal", IMP, 1, 2});
 
     // ADC
     opcodeTable[0x69] = {&CPU::ADC<&CPU::Immediate>, "ADC", IMM, 2, 2};
@@ -302,7 +306,23 @@ void CPU::ExecuteInstrFromRAM(uint16_t startingLocation, size_t number)
     }
 }
 
-void CPU::Run() {}
+void CPU::Run()
+{
+    static std::ofstream log("bbNESlog.txt");
+    do
+    {
+        log << std::hex << std::uppercase << (int)PC << '\t';
+        opcode = Read(PC);
+        for(int i = 0; i < opcodeTable[opcode].bytes; i++)
+        {
+            log << std::hex << (int)mainBus.Read(PC + i) << ' ';
+        }
+        PC++;
+        log << "\t\t" << opcodeTable[opcode].mnemonic << "\t\t\tA:" << std::hex << (int)A << " X:" << (int)X << " Y:" << (int)Y << " PS:" << (int)PS.value << " SP:" << (int)SP << " cycles:" << cycleCount << '\n';
+        ExecuteInstruction();
+
+    } while(opcode != 0x00 && opcodeTable[opcode].ptr != &CPU::Illegal);
+}
 
 void CPU::Reset()
 {
@@ -324,7 +344,7 @@ void CPU::Reset()
 void CPU::ExecuteInstruction()
 {
     (this->*(opcodeTable[opcode].ptr))();
-    // std::cout << "Executed instruction: " << opcodeTable[opcode].mnemonic << '\n';
+    std::cout << "Executed instruction: " << opcodeTable[opcode].mnemonic << '\n';
 }
 
 void CPU::Tick()
@@ -492,7 +512,8 @@ int CPU::ZeroPageX()
 {
     uint8_t zeroPageAddress = Read(PC++);
     Tick();
-    address = (uint16_t)((zeroPageAddress + X) % 256);
+    zeroPageAddress += X;
+    address = (uint16_t)zeroPageAddress;
     return 0;
 }
 
@@ -500,7 +521,8 @@ int CPU::ZeroPageY()
 {
     uint8_t zeroPageAddress = Read(PC++);
     Tick();
-    address = (uint16_t)((zeroPageAddress + Y) % 256);
+    zeroPageAddress += Y;
+    address = (uint16_t)zeroPageAddress;
     return 0;
 }
 
@@ -593,7 +615,7 @@ void CPU::ADC()
 
     // Overflow is set if the two operands have the same sign
     // (both 0 or both 1) and the resul have a different one
-    if ((~(A ^ (operand + carry)) & (A ^ result)) & 0x80)
+    if ((~(A ^ operand) & (A ^ result)) & 0x80)
     {
         PS.Set<V>();
     }
@@ -1099,7 +1121,7 @@ void CPU::SBC()
 
     // Overflow is set if the two operands have the same sign
     // (both 0 or both 1) and the resul have a different one
-    if ((~(A ^ (operand + carry)) & (A ^ result)) & 0x80)
+    if ((~(A ^ operand) & (A ^ result)) & 0x80)
     {
         PS.Set<V>();
     }

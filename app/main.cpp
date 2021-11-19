@@ -21,9 +21,8 @@ struct Timer
 };
 
 int main(int argc, char** argv)
-{
-    std::cout << "Hello, NES!\n\n";
-
+{  
+    /*
     Emulator nes;
     Debugger debugger(nes);
     uint8_t testRom[]{0xA9, 0x00, 0xA2, 0x1F, 0x9D, 0x00, 0x03, 0xBD, 0x00,
@@ -40,5 +39,21 @@ int main(int argc, char** argv)
     {
         std::cout << disassembled[i] << '\n';
     }
+    */
+
+    // Loading ROM passed as command line argument
+    if(argc < 2) return -1;
+
+    Emulator mainEmulator;
+    Debugger mainDebugger(mainEmulator);
+    mainDebugger.LoadROM(argv[1]);
+    mainDebugger.SetPC(0xC000);
+    mainDebugger.Run();
+    uint8_t byte1 = mainDebugger.GetMemoryState().at(0x02);
+    uint8_t byte2 = mainDebugger.GetMemoryState().at(0x03);
+    Debugger::CpuState state = mainDebugger.GetCpuState();
+
+    std::cout << "byte 0x02: " << std::hex << (int)byte1 << ", byte 0x03: " << std::hex << (int)byte2 << std::endl;
+    std::cout << "A:" << std::hex << (int)state.A << ", X:" << (int)state.X << ", Y:" << (int)state.Y << ", PS:" << (int)state.PS.value << ", SP:" << (int)state.SP << ", cycles:" << state.cycleCount << std::endl;
     return 0;
 }

@@ -26,6 +26,12 @@ public:
     // memory location <startingLocation>
     void LoadInstrFromArray(const uint8_t* instructions, size_t number, uint16_t startingLocation = 0x0700);
 
+    void SetPC(uint16_t address);
+
+    bool LoadROM(const std::string& pathToROM);
+
+    void Run();
+
     // Outputs the disassembled instructions in outputArray and returns their number
     size_t Disassembly(std::string* outputArray, uint16_t startingAddress, size_t number);
 

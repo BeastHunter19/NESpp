@@ -14,6 +14,12 @@ set(
     EmulatorCore.h
     Debugger.cpp
     Emulator.cpp
+    Cartridge.h
+    Cartridge.cpp
+    mappers/Mapper.h
+    mappers/Mapper.cpp
+    mappers/NROM.h
+    mappers/NROM.cpp
 )
 
 list(TRANSFORM NESpp_HEADERS PREPEND include/NESpp/)

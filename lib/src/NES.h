@@ -2,6 +2,7 @@
 #define NES_H
 
 #include "CPU.h"
+#include "Cartridge.h"
 #include <array>
 
 /*
@@ -27,7 +28,7 @@ class NES
 {
 public:
     NES();
-    virtual ~NES() = default;
+    ~NES() = default;
 
     // These are going to dispatch memory access
     uint8_t Read(uint16_t address) const;
@@ -37,11 +38,15 @@ public:
 
     void ResetRAM();
 
+    bool LoadGame(const std::string& pathToROM);
+
     friend class Debugger;
 
 private:
     // Peripherals attached to the NES
     CPU cpu;
+
+    Cartridge cart;
 
     /*
      * 2KiB of main RAM available to the CPU,

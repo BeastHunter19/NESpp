@@ -23,6 +23,21 @@ void Debugger::LoadInstrFromArray(const uint8_t* instructions, size_t number, ui
     std::memcpy(core->RAM.data() + startingLocation, instructions, number);
 }
 
+void Debugger::SetPC(uint16_t address)
+{
+    core->cpu.PC = address;
+}
+
+bool Debugger::LoadROM(const std::string& pathToROM)
+{
+    return core->LoadGame(pathToROM);
+}
+
+void Debugger::Run()
+{
+    core->cpu.Run();
+}
+
 size_t Debugger::Disassembly(std::string* outputArray, uint16_t startingAddress, size_t number)
 {
     size_t address = startingAddress;
@@ -115,9 +130,15 @@ size_t Debugger::Disassembly(std::string* outputArray, uint16_t startingAddress,
 Debugger::CpuState Debugger::ExecuteInstrFromArray(const uint8_t* instructions, size_t number,
                                                    uint16_t startingLocation)
 {
+    core->cpu.Reset();
     LoadInstrFromArray(instructions, number, startingLocation);
     core->cpu.ExecuteInstrFromRAM(startingLocation, number);
     return GetCpuState();
+}
+
+const std::array<uint8_t, 2048>& Debugger::GetMemoryState() const
+{
+    return core->RAM;
 }
 
 Debugger::CpuState Debugger::GetCpuState() const
