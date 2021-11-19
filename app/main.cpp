@@ -48,12 +48,12 @@ int main(int argc, char** argv)
     Debugger mainDebugger(mainEmulator);
     mainDebugger.LoadROM(argv[1]);
     mainDebugger.SetPC(0xC000);
-    mainDebugger.Run();
-    uint8_t byte1 = mainDebugger.GetMemoryState().at(0x02);
-    uint8_t byte2 = mainDebugger.GetMemoryState().at(0x03);
+    mainDebugger.RunWithTrace();
+    uint8_t byte1 = mainDebugger.GetMemoryState().at(0x00);
+    uint8_t byte2 = mainDebugger.GetMemoryState().at(0x01);
     Debugger::CpuState state = mainDebugger.GetCpuState();
 
-    std::cout << "byte 0x02: " << std::hex << (int)byte1 << ", byte 0x03: " << std::hex << (int)byte2 << std::endl;
+    std::cout << "byte 0x00: " << std::hex << (int)byte1 << ", byte 0x01: " << std::hex << (int)byte2 << std::endl;
     std::cout << "A:" << std::hex << (int)state.A << ", X:" << (int)state.X << ", Y:" << (int)state.Y << ", PS:" << (int)state.PS.value << ", SP:" << (int)state.SP << ", cycles:" << state.cycleCount << std::endl;
     return 0;
 }

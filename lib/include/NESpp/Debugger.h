@@ -30,7 +30,8 @@ public:
 
     bool LoadROM(const std::string& pathToROM);
 
-    void Run();
+    // Dumps log of executed instructions at the given path
+    void RunWithTrace(const std::filesystem::path& output = "emulatorLog.txt");
 
     // Outputs the disassembled instructions in outputArray and returns their number
     size_t Disassembly(std::string* outputArray, uint16_t startingAddress, size_t number);

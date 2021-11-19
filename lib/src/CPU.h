@@ -110,8 +110,8 @@ private:
     inline void Tick();
 
     // Access the main addressing space
-    inline uint8_t Read(uint16_t address);
-    inline void Write(uint16_t address, uint8_t data);
+    uint8_t Read(uint16_t address);
+    void Write(uint16_t address, uint8_t data);
 
     // Checks if there is going to be a page boundary cross
     inline bool PageCrossed(uint16_t address, uint16_t offset);
@@ -203,7 +203,7 @@ private:
      */
 
     // Empty placeholder instruction for illegal opcodes
-    inline void Illegal();
+    void Illegal();
 
     template <AddressModePtr AddrMode>
     inline void ADC();

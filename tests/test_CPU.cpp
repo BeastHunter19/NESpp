@@ -20,7 +20,7 @@ TEST_CASE("CPU executes all instructions correctly")
         CHECK(state.cycleCount == 2);
         CHECK(state.PC == 0x0700 + 1);
         CHECK(state.SP == 0xFD);
-        CHECK(state.PS.value == 0x34);
+        CHECK(state.PS.value == 0x24);
     }
 
     SUBCASE("ADC")

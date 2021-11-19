@@ -11,7 +11,7 @@ CPU::CPU(NES& mainBus)
 {
     cycleCount = 0;
 
-    PS.value = 0x34;
+    PS.value = 0x24;
     A = X = Y = 0;
     // SP value after reset will be 0xFD
     SP = 0x00;
