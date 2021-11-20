@@ -53,7 +53,13 @@ int main(int argc, char** argv)
     uint8_t byte2 = mainDebugger.GetMemoryState().at(0x01);
     Debugger::CpuState state = mainDebugger.GetCpuState();
 
+    uint8_t test1, test2, test3;
+    test1 = mainDebugger.GetPRG_ROM().at(0x0FF2);
+    test2 = mainDebugger.GetPRG_ROM().at(0x0FF3);
+    test3 = mainDebugger.GetPRG_ROM().at(0x0FF4);
+
     std::cout << "byte 0x00: " << std::hex << (int)byte1 << ", byte 0x01: " << std::hex << (int)byte2 << std::endl;
     std::cout << "A:" << std::hex << (int)state.A << ", X:" << (int)state.X << ", Y:" << (int)state.Y << ", PS:" << (int)state.PS.value << ", SP:" << (int)state.SP << ", cycles:" << state.cycleCount << std::endl;
+    std::cout << "CFF2: " << std::hex << (int)test1 << "  CFF3: " << (int)test2 << "  CFF4: " << (int)test3 << std::endl;
     return 0;
 }

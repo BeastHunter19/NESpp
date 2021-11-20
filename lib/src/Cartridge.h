@@ -18,6 +18,8 @@ public:
     uint8_t ReadFromCHR(uint16_t address) const;
 
     bool IsValid() const;
+
+    friend class Debugger;
 private:
     bool validRom;
     int banksPRG, banksCHR;

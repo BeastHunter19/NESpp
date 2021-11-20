@@ -49,6 +49,7 @@ public:
     CpuState ExecuteInstrFromArray(const uint8_t* instructions, size_t number, uint16_t startingLocation = 0x0700);
 
     const std::array<uint8_t, 2048>& GetMemoryState() const;
+    const std::vector<uint8_t>& GetPRG_ROM() const;
 
 private:
     std::vector<CPU::Instruction> instructions;

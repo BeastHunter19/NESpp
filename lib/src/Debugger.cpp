@@ -42,10 +42,10 @@ void Debugger::RunWithTrace(const std::filesystem::path& output)
     CpuState state;
     do
     {
+        state = GetCpuState();
         core->cpu.opcode = core->cpu.Read(core->cpu.PC);
         instr = &(core->cpu.opcodeTable[core->cpu.opcode]);
         Disassembly(&disassembly, core->cpu.PC, instr->bytes);
-        state = GetCpuState();
         outputLine = fmt::format("{}\t\t\t\tA:{:02X} X:{:02X} Y:{:02X} P:{:02X} SP:{:02X}\tcycles:{:d}\n",
                                  disassembly, state.A, state.X, state.Y, state.PS.value, state.SP, state.cycleCount);
         log << outputLine;
@@ -74,64 +74,64 @@ size_t Debugger::Disassembly(std::string* outputArray, uint16_t startingAddress,
             break;
         }
         case CPU::IMM: {
-            outputArray[instructionsRead] = fmt::format("{:0>4X} {:02X} {:02X}\t\t\t{} #${:0>2X}", address, bytes[0],
+            outputArray[instructionsRead] = fmt::format("{:0>4X} {:02X} {:02X}\t\t{} #${:0>2X}", address, bytes[0],
                                                         bytes[1], currentInstruction.mnemonic, bytes[1]);
             break;
         }
         case CPU::ZP: {
-            outputArray[instructionsRead] = fmt::format("{:0>4X} {:02X} {:02X}\t\t\t{} ${:0>2X}", address, bytes[0],
+            outputArray[instructionsRead] = fmt::format("{:0>4X} {:02X} {:02X}\t\t{} ${:0>2X}", address, bytes[0],
                                                         bytes[1], currentInstruction.mnemonic, bytes[1]);
             break;
         }
         case CPU::ZPX: {
-            outputArray[instructionsRead] = fmt::format("{:0>4X} {:02X} {:02X}\t\t\t{} ${:0>2X},x", address, bytes[0],
+            outputArray[instructionsRead] = fmt::format("{:0>4X} {:02X} {:02X}\t\t{} ${:0>2X},x", address, bytes[0],
                                                         bytes[1], currentInstruction.mnemonic, bytes[1]);
             break;
         }
         case CPU::ZPY: {
-            outputArray[instructionsRead] = fmt::format("{:0>4X} {:02X} {:02X}\t\t\t{} ${:0>2X},y", address, bytes[0],
+            outputArray[instructionsRead] = fmt::format("{:0>4X} {:02X} {:02X}\t\t{} ${:0>2X},y", address, bytes[0],
                                                         bytes[1], currentInstruction.mnemonic, bytes[1]);
             break;
         }
         case CPU::ABS: {
             outputArray[instructionsRead] =
-                fmt::format("{:0>4X} {:02X} {:02X} {:02X}\t\t\t{} ${:0>2X}{:0>2X}", address, bytes[0], bytes[1], bytes[2],
+                fmt::format("{:0>4X} {:02X} {:02X} {:02X}\t{} ${:0>2X}{:0>2X}", address, bytes[0], bytes[1], bytes[2],
                             currentInstruction.mnemonic, bytes[2], bytes[1]);
             break;
         }
         case CPU::ABSX: {
             outputArray[instructionsRead] =
-                fmt::format("{:0>4X} {:02X} {:02X} {:02X}\t\t\t{} ${:0>2X}{:0>2X},x", address, bytes[0], bytes[1],
+                fmt::format("{:0>4X} {:02X} {:02X} {:02X}\t{} ${:0>2X}{:0>2X},x", address, bytes[0], bytes[1],
                             bytes[2], currentInstruction.mnemonic, bytes[2], bytes[1]);
             break;
         }
         case CPU::ABSY: {
             outputArray[instructionsRead] =
-                fmt::format("{:0>4X} {:02X} {:02X} {:02X}\t\t\t{} ${:0>2X}{:0>2X},y", address, bytes[0], bytes[1],
+                fmt::format("{:0>4X} {:02X} {:02X} {:02X}\t{} ${:0>2X}{:0>2X},y", address, bytes[0], bytes[1],
                             bytes[2], currentInstruction.mnemonic, bytes[2], bytes[1]);
             break;
         }
         case CPU::REL: {
-            outputArray[instructionsRead] = fmt::format("{:0>4X} {:02X} {:02X}\t\t\t{} ${:+d}", address, bytes[0],
+            outputArray[instructionsRead] = fmt::format("{:0>4X} {:02X} {:02X}\t\t{} ${:+d}", address, bytes[0],
                                                         bytes[1], currentInstruction.mnemonic, (int)bytes[1]);
             break;
         }
         case CPU::IND: {
             outputArray[instructionsRead] =
-                fmt::format("{:0>4X} {:02X} {:02X} {:02X}\t\t\t{} (${:0>2X}{:0>2X})", address, bytes[0], bytes[1],
+                fmt::format("{:0>4X} {:02X} {:02X} {:02X}\t{} (${:0>2X}{:0>2X})", address, bytes[0], bytes[1],
                             bytes[2], currentInstruction.mnemonic, bytes[2], bytes[1]);
             break;
         }
         case CPU::INDX: {
             outputArray[instructionsRead] =
-                fmt::format("{:0>4X} {:02X} {:02X} {:02X}\t\t\t{} (${:0>2X}{:0>2X},x)", address, bytes[0], bytes[1],
-                            bytes[2], currentInstruction.mnemonic, bytes[2], bytes[1]);
+                fmt::format("{:0>4X} {:02X} {:02X} \t\t{} (${:0>2X},x)", address, bytes[0], bytes[1],
+                            currentInstruction.mnemonic, bytes[1]);
             break;
         }
         case CPU::INDY: {
             outputArray[instructionsRead] =
-                fmt::format("{:0>4X} {:02X} {:02X} {:02X}\t\t\t{} (${:0>2X}{:0>2X}),y", address, bytes[0], bytes[1],
-                            bytes[2], currentInstruction.mnemonic, bytes[2], bytes[1]);
+                fmt::format("{:0>4X} {:02X} {:02X}\t\t{} (${:0>2X}),y", address, bytes[0], bytes[1],
+                            currentInstruction.mnemonic, bytes[1]);
             break;
         }
         }
@@ -154,6 +154,11 @@ Debugger::CpuState Debugger::ExecuteInstrFromArray(const uint8_t* instructions, 
 const std::array<uint8_t, 2048>& Debugger::GetMemoryState() const
 {
     return core->RAM;
+}
+
+const std::vector<uint8_t>& Debugger::GetPRG_ROM() const
+{
+    return core->cart.PRG_ROM;
 }
 
 Debugger::CpuState Debugger::GetCpuState() const

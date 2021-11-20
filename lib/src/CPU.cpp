@@ -308,19 +308,10 @@ void CPU::ExecuteInstrFromRAM(uint16_t startingLocation, size_t number)
 
 void CPU::Run()
 {
-    static std::ofstream log("bbNESlog.txt");
     do
     {
-        log << std::hex << std::uppercase << (int)PC << '\t';
-        opcode = Read(PC);
-        for(int i = 0; i < opcodeTable[opcode].bytes; i++)
-        {
-            log << std::hex << (int)mainBus.Read(PC + i) << ' ';
-        }
-        PC++;
-        log << "\t\t" << opcodeTable[opcode].mnemonic << "\t\t\tA:" << std::hex << (int)A << " X:" << (int)X << " Y:" << (int)Y << " PS:" << (int)PS.value << " SP:" << (int)SP << " cycles:" << cycleCount << '\n';
+        opcode = Read(PC++);
         ExecuteInstruction();
-
     } while(opcode != 0x00 && opcodeTable[opcode].ptr != &CPU::Illegal);
 }
 
@@ -564,7 +555,8 @@ int CPU::IndexedIndirect()
     Tick();
     zeroPagePointer += X;
     uint8_t effectiveAddressLow = Read(zeroPagePointer);
-    uint8_t effectiveAddressHigh = Read(zeroPagePointer + 1);
+    zeroPagePointer++;
+    uint8_t effectiveAddressHigh = Read(zeroPagePointer);
     address = ((uint16_t)effectiveAddressHigh << 8) | effectiveAddressLow;
     return 0;
 }
@@ -652,6 +644,10 @@ void CPU::ASL()
     else
     {
         (this->*AddrMode)();
+        if(AddrMode == &CPU::AbsoluteX)
+        {
+            Tick();
+        }
         uint8_t operand = Read(address);
         Write(address, operand);
         uint8_t memBit7 = (operand & 0x80) >> 7;
@@ -956,6 +952,10 @@ void CPU::LSR()
     else
     {
         (this->*AddrMode)();
+        if(AddrMode == &CPU::AbsoluteX)
+        {
+            Tick();
+        }
         uint8_t operand = Read(address);
         Write(address, operand);
         uint8_t memBit0 = operand & 0x01;
@@ -995,7 +995,9 @@ template <CPU::AddressModePtr AddrMode>
 void CPU::PHP()
 {
     Tick();
+    PS.Set<B>();
     PushStack(PS.value);
+    PS.Clear<B>();
 }
 
 template <CPU::AddressModePtr AddrMode>
@@ -1013,6 +1015,8 @@ void CPU::PLP()
     Tick();
     Tick();
     PS.value = PullStack();
+    PS.Clear<B>();
+    PS.Set<_>();
 }
 
 template <CPU::AddressModePtr AddrMode>
@@ -1030,6 +1034,10 @@ void CPU::ROL()
     else
     {
         (this->*AddrMode)();
+        if(AddrMode == &CPU::AbsoluteX)
+        {
+            Tick();
+        }
         uint8_t operand = Read(address);
         Write(address, operand);
         uint8_t memBit7 = (operand & 0x80) >> 7;
@@ -1056,6 +1064,10 @@ void CPU::ROR()
     else
     {
         (this->*AddrMode)();
+        if(AddrMode == &CPU::AbsoluteX)
+        {
+            Tick();
+        }
         uint8_t operand = Read(address);
         Write(address, operand);
         uint8_t memBit0 = operand & 0x01;
@@ -1073,6 +1085,8 @@ void CPU::RTI()
     Tick();
     Tick();
     PS.value = PullStack();
+    PS.Clear<B>();
+    PS.Set<_>();
     uint8_t PCL = PullStack();
     uint8_t PCH = PullStack();
     PC = ((uint16_t)PCH << 8) | PCL;
